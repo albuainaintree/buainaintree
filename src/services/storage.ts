@@ -1,5 +1,11 @@
 import { Family, Submission, SubmissionPerson, RequestStatus, SiteBackupData } from '../types';
 import { INITIAL_FAMILIES, INITIAL_SUBMISSIONS } from '../data/mockFamilies';
+import { 
+  syncFamilyToFirestore, 
+  deleteFamilyFromFirestore, 
+  syncSubmissionToFirestore, 
+  subscribeToFirestore 
+} from './firebaseClient';
 
 // Storage keys
 const FAMILIES_KEY = 'albuainain_tree_families_v8';
@@ -130,6 +136,24 @@ export async function initStorage(): Promise<void> {
     } else if (memorySubmissions.length > 0) {
       await idbSet('submissions', memorySubmissions);
     }
+
+    // Subscribe to Firestore for real-time live synchronization
+    subscribeToFirestore(
+      (fams) => {
+        if (fams && fams.length > 0) {
+          memoryFamilies = fams;
+          idbSet('families', fams);
+          window.dispatchEvent(new Event('albuainain_families_updated'));
+        }
+      },
+      (subs) => {
+        if (subs && subs.length > 0) {
+          memorySubmissions = subs;
+          idbSet('submissions', subs);
+          window.dispatchEvent(new Event('albuainain_submissions_updated'));
+        }
+      }
+    );
   } catch (err) {
     console.warn('Storage hydration warning:', err);
   }
@@ -151,20 +175,22 @@ export function loadFamilies(): Family[] {
 export function saveFamilies(families: Family[]): void {
   memoryFamilies = families;
 
-  // 1. Save to IndexedDB (asynchronous, no 5MB quota limit)
+  // 1. Sync to Firebase Firestore cloud database
+  families.forEach(f => syncFamilyToFirestore(f));
+
+  // 2. Save to IndexedDB (asynchronous, no 5MB quota limit)
   idbSet('families', families).catch(err => {
     console.error('Failed to save families to IndexedDB:', err);
   });
 
-  // 2. Try saving to localStorage safely without throwing QuotaExceededError
+  // 3. Try saving to localStorage safely without throwing QuotaExceededError
   try {
     localStorage.setItem(FAMILIES_KEY, JSON.stringify(families));
   } catch (e) {
-    // Quota exceeded in localStorage is safe to ignore because IndexedDB stores the full data
     console.warn('LocalStorage quota reached. Data safely persisted in IndexedDB.', e);
   }
 
-  // 3. Notify app components
+  // 4. Notify app components
   window.dispatchEvent(new Event('albuainain_families_updated'));
 }
 
@@ -175,19 +201,22 @@ export function loadSubmissions(): Submission[] {
 export function saveSubmissions(submissions: Submission[]): void {
   memorySubmissions = submissions;
 
-  // 1. Save to IndexedDB
+  // 1. Sync to Firebase Firestore cloud database
+  submissions.forEach(s => syncSubmissionToFirestore(s));
+
+  // 2. Save to IndexedDB
   idbSet('submissions', submissions).catch(err => {
     console.error('Failed to save submissions to IndexedDB:', err);
   });
 
-  // 2. Try saving to localStorage safely
+  // 3. Try saving to localStorage safely
   try {
     localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(submissions));
   } catch (e) {
     console.warn('LocalStorage quota reached for submissions. Data safely persisted in IndexedDB.', e);
   }
 
-  // 3. Notify app components
+  // 4. Notify app components
   window.dispatchEvent(new Event('albuainain_submissions_updated'));
 }
 
@@ -330,6 +359,7 @@ export function deleteFamily(familyId: string): boolean {
   const families = loadFamilies();
   const filtered = families.filter(f => f.id !== familyId);
   if (filtered.length !== families.length) {
+    deleteFamilyFromFirestore(familyId);
     saveFamilies(filtered);
     return true;
   }
