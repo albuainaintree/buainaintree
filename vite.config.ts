@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Relative base path ('./') ensures assets load correctly on GitHub Pages
+    // (e.g. https://albuainaintree.github.io/buainaintree/) as well as custom domains
+    base: './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

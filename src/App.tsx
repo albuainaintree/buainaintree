@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Family, Submission } from './types';
-import { loadFamilies, loadSubmissions } from './services/storage';
+import { loadFamilies, loadSubmissions, initStorage } from './services/storage';
 import { getAppConfig } from './services/config';
 import { Header } from './components/Header';
 import { FamiliesGrid } from './components/FamiliesGrid';
@@ -44,6 +44,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    initStorage().then(() => refreshData());
     refreshData();
 
     const handleFamiliesUpdate = () => setFamilies(loadFamilies());

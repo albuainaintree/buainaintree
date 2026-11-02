@@ -11,6 +11,7 @@ import {
 import { exportDatabaseToExcel } from '../services/excelExport';
 import { getLineageStatusLabel } from '../services/emailService';
 import { generateFamilyTreeSvg } from '../data/mockFamilies';
+import { compressImageFile } from '../utils/imageCompressor';
 import { 
   ShieldCheck, 
   Lock, 
@@ -81,6 +82,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Excel & Backup States
   const [isExporting, setIsExporting] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [statusNotice, setStatusNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const backupFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -252,23 +254,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     e.target.value = '';
   };
 
-  // Upload Tree Image (Base64)
-  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload Tree Image (Compressed & Optimized for High Capacity)
+  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setFamilyModal(prev => ({
-            ...prev,
-            family: {
-              ...prev.family,
-              treeImageUrl: reader.result as string,
-            },
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsProcessingImage(true);
+        const optimizedDataUrl = await compressImageFile(file, 2600, 0.86);
+        setFamilyModal(prev => ({
+          ...prev,
+          family: {
+            ...prev.family,
+            treeImageUrl: optimizedDataUrl,
+          },
+        }));
+      } catch (err) {
+        console.error('Error processing image:', err);
+        alert('تعذر معالجة الصورة، يرجى اختيار ملف صورة صالح.');
+      } finally {
+        setIsProcessingImage(false);
+      }
     }
   };
 
@@ -1005,12 +1010,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </label>
 
                 <div className="flex items-center gap-2">
-                  <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs text-slate-200 transition">
-                    <Upload className="w-4 h-4 text-[#C5A059]" />
-                    <span>رفع صورة المشجرة من جهازك</span>
+                  <label className={`flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-xs transition ${
+                    isProcessingImage 
+                      ? 'bg-[#0F3D3E] border-[#C5A059] text-[#E5C384]' 
+                      : 'bg-white/5 hover:bg-white/10 border-white/15 text-slate-200'
+                  }`}>
+                    {isProcessingImage ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-[#E5C384] border-t-transparent rounded-full animate-spin" />
+                        <span>جاري ضغط ومعالجة الصورة بدقة عالية...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-[#C5A059]" />
+                        <span>رفع صورة المشجرة من جهازك</span>
+                      </>
+                    )}
                     <input
                       type="file"
                       accept="image/*"
+                      disabled={isProcessingImage}
                       onChange={handleImageFileUpload}
                       className="hidden"
                     />
