@@ -103,13 +103,15 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            <button
-              onClick={onOpenSettings}
-              className="p-2 rounded-xl text-slate-400 hover:text-[#E5C384] hover:bg-white/5 transition"
-              title="إعدادات الربط السحابي (Firebase / EmailJS)"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
+            {isAdminLoggedIn && (
+              <button
+                onClick={onOpenSettings}
+                className="p-2 rounded-xl text-slate-400 hover:text-[#E5C384] hover:bg-white/5 transition"
+                title="إعدادات الربط السحابي (Firebase / EmailJS)"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            )}
 
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
@@ -196,16 +198,18 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
-          <button
-            onClick={() => {
-              onOpenSettings();
-              setMobileMenuOpen(false);
-            }}
-            className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5"
-          >
-            <Settings className="w-4 h-4 text-[#C5A059]" />
-            إعدادات الربط السحابي (Firebase / EmailJS)
-          </button>
+          {isAdminLoggedIn && (
+            <button
+              onClick={() => {
+                onOpenSettings();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/5"
+            >
+              <Settings className="w-4 h-4 text-[#C5A059]" />
+              إعدادات الربط السحابي (Firebase / EmailJS)
+            </button>
+          )}
 
           {isAdminLoggedIn && (
             <button

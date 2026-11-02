@@ -32,7 +32,10 @@ import {
   Download,
   Database,
   FileUp,
-  RefreshCw
+  RefreshCw,
+  Key,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -40,7 +43,7 @@ interface AdminDashboardProps {
   families: Family[];
   onRefreshData: () => void;
   isAdminLoggedIn: boolean;
-  onAdminLogin: (email: string) => boolean;
+  onAdminLogin: (username: string, password: string) => boolean;
   onAdminLogout: () => void;
   adminEmail: string;
   onOpenSettings: () => void;
@@ -57,7 +60,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onOpenSettings,
 }) => {
   // Login Form States
-  const [loginEmailInput, setLoginEmailInput] = useState('');
+  const [usernameInput, setUsernameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
   // Active Admin Tab
@@ -126,14 +131,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
-    const success = onAdminLogin(loginEmailInput.trim());
+    const success = onAdminLogin(usernameInput.trim(), passwordInput);
     if (!success) {
-      setLoginError(`عذراً، هذا الحساب (${loginEmailInput}) غير مصرح له بالدخول. لوحة التحكم مقصورة حصرياً على بريد مدير المشروع المعتمد: ${adminEmail}`);
+      setLoginError('اسم المستخدم أو كلمة المرور غير صحيحة.');
     }
-  };
-
-  const handleDemoAdminLogin = () => {
-    onAdminLogin(adminEmail);
   };
 
   // Handle Submissions Actions
@@ -287,57 +288,73 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0F3D3E] to-[#122238] border border-[#C5A059] flex items-center justify-center mx-auto text-[#E5C384] shadow-lg">
             <Lock className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-black text-white">تسجيل دخول إدارة المشروع</h2>
-          <p className="text-xs text-slate-300">
-            لوحة الإدارة مقيدة ومحمية عبر حساب بريد المدير المعتمد
+          <h2 className="text-2xl font-black text-white">تسجيل الدخول للوحة التحكم</h2>
+          <p className="text-xs text-slate-400">
+            يرجى إدخال بيانات الاعتماد المخصصة لإدارة المشروع
           </p>
         </div>
 
         {loginError && (
-          <div className="p-3.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <p className="leading-relaxed">{loginError}</p>
+          <div className="p-3.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs flex items-start gap-2 animate-shake">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+            <p className="leading-relaxed font-medium">{loginError}</p>
           </div>
         )}
 
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-200">
-              البريد الإلكتروني (Google / Gmail):
+              اسم المستخدم
             </label>
-            <input
-              type="email"
-              required
-              value={loginEmailInput}
-              onChange={e => setLoginEmailInput(e.target.value)}
-              placeholder="albuainaintree@gmail.com"
-              className="glass-input w-full rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 text-left"
-              dir="ltr"
-            />
-            <p className="text-[11px] text-slate-400">
-              البريد المعتمد للمشروع: <span className="font-mono text-[#E5C384]">{adminEmail}</span>
-            </p>
+            <div className="relative">
+              <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                <User className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                required
+                value={usernameInput}
+                onChange={e => setUsernameInput(e.target.value)}
+                className="glass-input w-full rounded-xl pr-10 pl-4 py-3 text-sm text-white"
+                autoComplete="username"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-200">
+              كلمة المرور
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                <Key className="w-4 h-4" />
+              </div>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={passwordInput}
+                onChange={e => setPasswordInput(e.target.value)}
+                className="glass-input w-full rounded-xl pr-10 pl-10 py-3 text-sm text-white font-mono"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 hover:text-white transition"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-sm font-bold shadow-lg shadow-[#C5A059]/30 hover:brightness-110 transition"
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-sm font-bold shadow-lg shadow-[#C5A059]/30 hover:brightness-110 active:scale-95 transition mt-2"
           >
-            دخول بلوحة التحكم
+            تسجيل الدخول
           </button>
         </form>
-
-        <div className="relative border-t border-white/10 pt-4 text-center">
-          <span className="text-[11px] text-slate-400 block mb-2">أو للتجربة الفورية والتحقق السريع (Demo Mode):</span>
-          <button
-            type="button"
-            onClick={handleDemoAdminLogin}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#0F3D3E] hover:bg-[#155253] border border-[#C5A059]/40 text-xs font-bold text-[#E5C384] transition shadow flex items-center justify-center gap-2"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>دخول فوري بحساب المدير المعتمد ({adminEmail})</span>
-          </button>
-        </div>
       </div>
     );
   }
@@ -355,9 +372,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C5A059]/20 border border-[#C5A059]/50 text-xs font-bold text-[#E5C384]">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                حساب المدير المعتمد
+                لوحة تحكم الإدارة المعتمدة
               </span>
-              <span className="text-xs text-slate-300 font-mono" dir="ltr">{adminEmail}</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-black gold-gradient-text">
               لوحة إدارة مشروع شجرة آل بوعينين

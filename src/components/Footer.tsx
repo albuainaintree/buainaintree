@@ -3,9 +3,10 @@ import React from 'react';
 interface FooterProps {
   onNavigate: (view: 'home' | 'form' | 'admin') => void;
   onOpenSettings: () => void;
+  isAdminLoggedIn?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, isAdminLoggedIn = false }) => {
   return (
     <footer className="w-full border-t border-[#C5A059]/20 bg-[#060A14] text-slate-400 text-xs py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -43,13 +44,18 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings }) =>
             >
               لوحة تحكم المدير
             </button>
-            <span className="text-white/20">•</span>
-            <button
-              onClick={onOpenSettings}
-              className="hover:text-[#E5C384] transition"
-            >
-              إعدادات السحاب
-            </button>
+            
+            {isAdminLoggedIn && (
+              <>
+                <span className="text-white/20">•</span>
+                <button
+                  onClick={onOpenSettings}
+                  className="hover:text-[#E5C384] transition text-[#C5A059]"
+                >
+                  إعدادات السحاب
+                </button>
+              </>
+            )}
           </div>
         </div>
 

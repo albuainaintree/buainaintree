@@ -66,13 +66,9 @@ export default function App() {
     }
   }, [families, selectedFamily]);
 
-  // Handle Admin Login
-  const handleAdminLogin = (email: string): boolean => {
-    const config = getAppConfig();
-    const normalizedInput = email.toLowerCase().trim();
-    const authorizedEmail = config.adminEmail.toLowerCase().trim();
-
-    if (normalizedInput === authorizedEmail) {
+  // Handle Admin Login (tree4all / AllahAkbar)
+  const handleAdminLogin = (username: string, password: string): boolean => {
+    if (username.trim() === 'tree4all' && password === 'AllahAkbar') {
       setIsAdminLoggedIn(true);
       sessionStorage.setItem('albuainain_admin_session', 'true');
       return true;
@@ -261,6 +257,7 @@ export default function App() {
       <Footer
         onNavigate={view => setCurrentView(view)}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        isAdminLoggedIn={isAdminLoggedIn}
       />
     </div>
   );
