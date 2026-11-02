@@ -1,0 +1,6 @@
+{
+  "name": "تحديث شجرة نسب آل بوعينين - الطبعة السادسة",
+  "description": "المنصة الرسمية لمشروع توثيق وتحديث شجرة نسب قبيلة آل بوعينين - الطبعة السادسة. استقبال طلبات التحديث، استعراض المشجرات، ولوحة إدارة متطورة مع تصدير Excel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
