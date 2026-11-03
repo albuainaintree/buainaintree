@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Submission } from '../types';
-import { getLineageStatusLabel, generateAdminMailtoUrl, ADMIN_EMAIL } from '../services/emailService';
+import { getLineageStatusLabel } from '../services/emailService';
 import { CheckCircle2, Copy, Check, MessageSquare, Printer, ArrowLeft, PlusCircle, Mail } from 'lucide-react';
 
 interface SubmissionSuccessModalProps {
@@ -131,15 +131,6 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
           >
             <MessageSquare className="w-4 h-4" />
             <span>إرسال تفاصيل الطلب عبر الواتساب للجنة</span>
-          </a>
-
-          {/* Direct Email to albuainaintree@gmail.com */}
-          <a
-            href={generateAdminMailtoUrl(submission)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0F3D3E] hover:bg-[#155253] text-[#E5C384] border border-[#C5A059]/40 font-semibold text-xs transition"
-          >
-            <Mail className="w-4 h-4 text-[#C5A059]" />
-            <span>إرسال نسخة للإدارة عبر البريد (albuainaintree@gmail.com)</span>
           </a>
 
           <div className="grid grid-cols-2 gap-2">
