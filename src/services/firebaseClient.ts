@@ -12,7 +12,7 @@ interface FirebaseAppCompat {
         get: () => Promise<{ exists: boolean; data: () => unknown }>;
       };
       get: () => Promise<{ docs: Array<{ id: string; data: () => unknown }> }>;
-      onSnapshot: (callback: (snapshot: { docs: Array<{ id: string; data: () => unknown }> }) => void) => () => void;
+      onSnapshot: (callback: (snapshot: { docs: Array<{ id: string; data: () => unknown }> }) => void, error?: (err: unknown) => void) => () => void;
     };
   };
 }
@@ -40,10 +40,11 @@ export function getFirestoreDB() {
           apiKey: config.firebaseApiKey,
           authDomain: config.firebaseAuthDomain || `${config.firebaseProjectId}.firebaseapp.com`,
           projectId: config.firebaseProjectId,
-          storageBucket: config.firebaseStorageBucket || `${config.firebaseProjectId}.appspot.com`,
+          storageBucket: config.firebaseStorageBucket || `${config.firebaseProjectId}.firebasestorage.app`,
           messagingSenderId: config.firebaseMessagingSenderId,
           appId: config.firebaseAppId,
         });
+        console.info('🔥 Firebase Cloud initialized successfully for project:', config.firebaseProjectId);
       }
       firestoreInstance = window.firebase.firestore();
       return firestoreInstance;
@@ -108,19 +109,27 @@ export function subscribeToFirestore(
   if (!db) return null;
 
   try {
-    const unsubFamilies = db.collection('families').onSnapshot((snapshot) => {
-      const fams: Family[] = snapshot.docs.map(doc => doc.data() as Family);
-      if (fams.length > 0) {
-        onFamiliesUpdate(fams);
-      }
-    });
+    // Initial fetch + Live Snapshot for Families
+    const unsubFamilies = db.collection('families').onSnapshot(
+      (snapshot) => {
+        const fams: Family[] = snapshot.docs.map(doc => doc.data() as Family);
+        if (fams.length > 0) {
+          onFamiliesUpdate(fams);
+        }
+      },
+      (err) => console.warn('Families listener note:', err)
+    );
 
-    const unsubSubmissions = db.collection('submissions').onSnapshot((snapshot) => {
-      const subs: Submission[] = snapshot.docs.map(doc => doc.data() as Submission);
-      if (subs.length > 0) {
-        onSubmissionsUpdate(subs);
-      }
-    });
+    // Initial fetch + Live Snapshot for Submissions
+    const unsubSubmissions = db.collection('submissions').onSnapshot(
+      (snapshot) => {
+        const subs: Submission[] = snapshot.docs.map(doc => doc.data() as Submission);
+        if (subs.length > 0) {
+          onSubmissionsUpdate(subs);
+        }
+      },
+      (err) => console.warn('Submissions listener note:', err)
+    );
 
     return () => {
       unsubFamilies();

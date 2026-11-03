@@ -1,34 +1,32 @@
 import { AppConfig } from '../types';
 
 // ============================================================================
-// ⚠️ TODO: Insert Firebase & EmailJS Config Here
-// ضع إعدادات Firebase و EmailJS الخاصة بمشروعك أدناه لتفعيل الربط السحابي المباشر.
-// التطبيق مجهز ليعمل تلقائياً في الوضع التجريبي (Demo Mode) بكفاءة كاملة في حال ترك الحقول فارغة.
+// Firebase & EmailJS Live Cloud Configuration
+// مشروع: buainain-be6e1 (المرتبط بحساب albuainaintree@gmail.com)
 // ============================================================================
 
 export const DEFAULT_CONFIG: AppConfig = {
-  // إعدادات Firebase (من لوحة تحكم Firebase Console)
-  firebaseApiKey: "",
-  firebaseAuthDomain: "",
-  firebaseProjectId: "",
-  firebaseStorageBucket: "",
-  firebaseMessagingSenderId: "",
-  firebaseAppId: "",
+  // إعدادات Firebase Live
+  firebaseApiKey: "AIzaSyD6JfQcLGHOhwh7ugX3y6hW02GAdjd8XmQ",
+  firebaseAuthDomain: "buainain-be6e1.firebaseapp.com",
+  firebaseProjectId: "buainain-be6e1",
+  firebaseStorageBucket: "buainain-be6e1.firebasestorage.app",
+  firebaseMessagingSenderId: "892187521292",
+  firebaseAppId: "1:892187521292:web:ffdbde786bc836ec7e5929",
 
-  // إعدادات EmailJS (من لوحة تحكم EmailJS)
-  // خدمة إرسال البريد الإلكتروني للمدير عند وصول أي طلب جديد
+  // إعدادات EmailJS
   emailjsServiceId: "service_albuainain",
   emailjsTemplateId: "template_tree_submission",
   emailjsPublicKey: "",
 
-  // البريد الإلكتروني الحصري لمدير النظام (مالك المشروع)
+  // البريد الإلكتروني الحصري لمدير النظام
   adminEmail: "albuainaintree@gmail.com",
 
-  // حالة الاتصال السحابي (إذا وُجدت مفاتيح Firebase)
-  isFirebaseActive: false,
+  // حالة الاتصال السحابي (نشط)
+  isFirebaseActive: true,
 };
 
-const CONFIG_STORAGE_KEY = 'albuainain_tree_app_config_v6';
+const CONFIG_STORAGE_KEY = 'albuainain_tree_app_config_v7';
 
 export function getAppConfig(): AppConfig {
   try {
@@ -38,7 +36,13 @@ export function getAppConfig(): AppConfig {
       return {
         ...DEFAULT_CONFIG,
         ...parsed,
-        isFirebaseActive: Boolean(parsed.firebaseApiKey && parsed.firebaseProjectId),
+        firebaseApiKey: parsed.firebaseApiKey || DEFAULT_CONFIG.firebaseApiKey,
+        firebaseProjectId: parsed.firebaseProjectId || DEFAULT_CONFIG.firebaseProjectId,
+        firebaseAuthDomain: parsed.firebaseAuthDomain || DEFAULT_CONFIG.firebaseAuthDomain,
+        firebaseStorageBucket: parsed.firebaseStorageBucket || DEFAULT_CONFIG.firebaseStorageBucket,
+        firebaseAppId: parsed.firebaseAppId || DEFAULT_CONFIG.firebaseAppId,
+        firebaseMessagingSenderId: parsed.firebaseMessagingSenderId || DEFAULT_CONFIG.firebaseMessagingSenderId,
+        isFirebaseActive: true,
       };
     }
   } catch (e) {
