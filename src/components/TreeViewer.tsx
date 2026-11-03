@@ -149,7 +149,7 @@ export const TreeViewer: React.FC<TreeViewerProps> = ({
           </head>
           <body>
             <div class="header">
-              <h1>مشجرة ${familyName} - الطبعة السادسة (2026م)</h1>
+              <h1>مشجرة ${familyName} - النسخة الخامسة (المرجع المعتمد للتحديث)</h1>
               <a href="${imageUrl}" download="مشجرة_${familyName}.svg" class="btn">تحميل الصورة</a>
             </div>
             <img src="${imageUrl}" alt="مشجرة ${familyName}">
@@ -264,7 +264,7 @@ export const TreeViewer: React.FC<TreeViewerProps> = ({
           
           <div className="absolute top-2.5 right-2.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-[#C5A059]/40 text-xs font-semibold text-[#E5C384] flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
-            <span>مشجرة {familyName} الحالية</span>
+            <span>مشجرة {familyName} (النسخة الخامسة)</span>
           </div>
 
           <div className="absolute bottom-2.5 inset-x-2.5 flex items-center justify-between text-xs text-white">
@@ -327,7 +327,7 @@ export const TreeViewer: React.FC<TreeViewerProps> = ({
               مشجرة {familyName}
             </h2>
             <div className="flex items-center gap-2 text-[11px] text-[#E5C384]">
-              <span>الطبعة السادسة</span>
+              <span className="font-bold">النسخة الخامسة (المرجع للتحديث)</span>
               <span className="text-white/30">•</span>
               <span>التقريب: {Math.round(scale * 100)}%</span>
             </div>

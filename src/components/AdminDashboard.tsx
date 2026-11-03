@@ -813,8 +813,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <p className="text-xs text-[#C5A059]">الفخذ: {fam.branch}</p>
                         )}
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-slate-300">
-                        {fam.lastUpdated || '2026م'}
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#0F3D3E] text-[#E5C384] border border-[#C5A059]/30 font-bold">
+                        النسخة الخامسة
                       </span>
                     </div>
 

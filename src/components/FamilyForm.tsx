@@ -210,8 +210,8 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({
           </div>
 
           <div className="px-4 py-2 rounded-2xl bg-black/35 border border-[#C5A059]/40 text-center sm:text-left self-start sm:self-center">
-            <span className="text-[10px] text-slate-300 block">مشروع التوثيق</span>
-            <span className="text-xs font-bold text-[#E5C384]">الطبعة السادسة (2026م)</span>
+            <span className="text-[10px] text-slate-300 block">المشجرة المرفقة أدناه</span>
+            <span className="text-xs font-bold text-[#E5C384]">النسخة الخامسة (المرجع للتحديث)</span>
           </div>
         </div>
       </div>
@@ -221,9 +221,9 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({
         <div className="flex items-center justify-between px-1">
           <h3 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-[#C5A059]" />
-            <span>معاينة صورة المشجرة الحالية:</span>
+            <span>معاينة صورة المشجرة (النسخة الخامسة المعتمدة للتحديث):</span>
           </h3>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">انقر لتكبيرها أو فتحها بصفحة مستقلة</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">انقر لتكبيرها وفحص الأسماء</span>
         </div>
 
         {/* TreeViewer in responsive compact mode */}

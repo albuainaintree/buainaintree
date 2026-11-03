@@ -183,8 +183,8 @@ export const FamiliesGrid: React.FC<FamiliesGridProps> = ({
                           </p>
                         )}
                       </div>
-                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#0F3D3E] text-[#E5C384] font-medium shrink-0">
-                        {fam.lastUpdated || '2026م'}
+                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#0F3D3E] text-[#E5C384] font-bold shrink-0 border border-[#C5A059]/30">
+                        النسخة الخامسة
                       </span>
                     </div>
 
@@ -201,6 +201,11 @@ export const FamiliesGrid: React.FC<FamiliesGridProps> = ({
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-80" />
                       
+                      {/* Top Edition Badge */}
+                      <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-lg bg-black/70 backdrop-blur-md border border-[#C5A059]/40 text-[10px] font-bold text-[#E5C384]">
+                        النسخة الخامسة (المرجع للتحديث)
+                      </div>
+
                       <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-[11px] text-white px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10">
                         <span className="flex items-center gap-1.5 font-medium">
                           <Eye className="w-3.5 h-3.5 text-[#C5A059]" />
