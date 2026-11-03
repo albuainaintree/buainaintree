@@ -35,7 +35,8 @@ import {
   RefreshCw,
   Key,
   Eye,
-  EyeOff
+  EyeOff,
+  Mail
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -429,10 +430,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={onOpenSettings}
-              className="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-medium transition"
-              title="إعدادات المفاتيح والربط"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 text-purple-200 border border-purple-400/40 text-xs sm:text-sm font-semibold transition active:scale-95"
+              title="إعدادات الربط السحابي والإشعارات البريدية"
             >
-              إعدادات السحاب
+              <Mail className="w-4 h-4 text-purple-300" />
+              <span>إعدادات الإيميل والسحاب</span>
             </button>
           </div>
         </div>

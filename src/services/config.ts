@@ -14,10 +14,10 @@ export const DEFAULT_CONFIG: AppConfig = {
   firebaseMessagingSenderId: "892187521292",
   firebaseAppId: "1:892187521292:web:ffdbde786bc836ec7e5929",
 
-  // إعدادات EmailJS
-  emailjsServiceId: "service_albuainain",
-  emailjsTemplateId: "template_tree_submission",
-  emailjsPublicKey: "",
+  // إعدادات EmailJS الحية للمشروع (حساب albuainaintree@gmail.com)
+  emailjsServiceId: "service_503c8zc",
+  emailjsTemplateId: "template_9zbl8kj",
+  emailjsPublicKey: "WZFAgB4y3tcR-ID5D",
 
   // البريد الإلكتروني الحصري لمدير النظام
   adminEmail: "albuainaintree@gmail.com",
@@ -26,7 +26,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   isFirebaseActive: true,
 };
 
-const CONFIG_STORAGE_KEY = 'albuainain_tree_app_config_v7';
+const CONFIG_STORAGE_KEY = 'albuainain_tree_app_config_v8';
 
 export function getAppConfig(): AppConfig {
   try {
@@ -36,6 +36,9 @@ export function getAppConfig(): AppConfig {
       return {
         ...DEFAULT_CONFIG,
         ...parsed,
+        emailjsServiceId: parsed.emailjsServiceId || DEFAULT_CONFIG.emailjsServiceId,
+        emailjsTemplateId: parsed.emailjsTemplateId || DEFAULT_CONFIG.emailjsTemplateId,
+        emailjsPublicKey: parsed.emailjsPublicKey || DEFAULT_CONFIG.emailjsPublicKey,
         firebaseApiKey: parsed.firebaseApiKey || DEFAULT_CONFIG.firebaseApiKey,
         firebaseProjectId: parsed.firebaseProjectId || DEFAULT_CONFIG.firebaseProjectId,
         firebaseAuthDomain: parsed.firebaseAuthDomain || DEFAULT_CONFIG.firebaseAuthDomain,
