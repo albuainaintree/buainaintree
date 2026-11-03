@@ -12,96 +12,119 @@
   body {
     font-family: 'Tajawal', 'Readex Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
-/* Custom Apple Liquid Glass effects */
+/* Light / Bright Theme Elements (Default & Luxurious) */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(197, 160, 89, 0.28);
+  box-shadow: 0 12px 36px -6px rgba(15, 61, 62, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
-.glass-panel-light {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 20px 40px rgba(15, 61, 62, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
-}
-
 .glass-card {
-  background: rgba(18, 27, 49, 0.55);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(197, 160, 89, 0.2);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(197, 160, 89, 0.28);
+  box-shadow: 0 8px 24px -4px rgba(15, 41, 66, 0.07);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: rgba(23, 36, 66, 0.75);
+  border-color: rgba(197, 160, 89, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -6px rgba(15, 61, 62, 0.12);
+}
+
+.dark .glass-card {
+  background: rgba(18, 27, 49, 0.65);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  box-shadow: none;
+}
+
+.dark .glass-card:hover {
+  background: rgba(23, 36, 66, 0.85);
   border-color: rgba(197, 160, 89, 0.5);
-  transform: translateY(-3px);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(197, 160, 89, 0.15);
 }
 
 .glass-input {
-  background: rgba(10, 16, 30, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #FFFFFF;
+  color: #0F172A;
+  border: 1.5px solid #CBD5E1;
+  font-size: 16px; /* Prevents auto-zoom in mobile Safari */
   transition: all 0.2s ease;
 }
 
 .glass-input:focus {
   border-color: #C5A059;
-  background: rgba(15, 23, 42, 0.85);
   box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.2);
   outline: none;
 }
 
+.dark .glass-input {
+  background: rgba(10, 16, 30, 0.65);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.dark .glass-input:focus {
+  border-color: #C5A059;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.25);
+}
+
 /* Gold Gradient Text */
 .gold-gradient-text {
-  background: linear-gradient(135deg, #FFF0D0 0%, #E5C384 45%, #C5A059 75%, #A88135 100%);
+  background: linear-gradient(135deg, #8E651D 0%, #B88E3E 40%, #825C17 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.emerald-gradient-text {
-  background: linear-gradient(135deg, #4ECCA3 0%, #209384 50%, #0F3D3E 100%);
+.dark .gold-gradient-text {
+  background: linear-gradient(135deg, #FFF0D0 0%, #E5C384 45%, #C5A059 75%, #A88135 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
+  background: rgba(240, 243, 248, 0.8);
+}
+
+.dark ::-webkit-scrollbar-track {
   background: rgba(10, 16, 30, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(197, 160, 89, 0.3);
+  background: rgba(197, 160, 89, 0.4);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(197, 160, 89, 0.6);
+  background: rgba(197, 160, 89, 0.7);
 }
 
-/* Subtle Shimmer Animation */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(197, 160, 89, 0.15) 50%, rgba(255,255,255,0) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 3s infinite linear;
+/* Mobile Touch Optimization */
+@media (max-width: 640px) {
+  input, select, textarea, button {
+    touch-action: manipulation;
+  }
 }

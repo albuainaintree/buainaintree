@@ -25,9 +25,9 @@ export const Header: React.FC<HeaderProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#C5A059]/25 bg-[#070b14]/80 backdrop-blur-2xl transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-[#C5A059]/30 bg-white/95 dark:bg-[#070b14]/90 backdrop-blur-xl transition-colors shadow-sm">
       {/* Top Heritage Ribbon */}
-      <div className="bg-gradient-to-r from-[#0a1a2e] via-[#0F3D3E] to-[#0a1a2e] py-1 px-4 text-center border-b border-[#C5A059]/30">
+      <div className="bg-gradient-to-r from-[#0F3D3E] via-[#164e4f] to-[#0F3D3E] py-1 px-4 text-center border-b border-[#C5A059]/30">
         <p className="text-[12px] md:text-xs text-[#E5C384] font-medium tracking-wide flex items-center justify-center gap-2">
           <Sparkles className="w-3.5 h-3.5 text-[#C5A059] animate-pulse" />
           <span>مشروع توثيق الطبعة السادسة لشجرة نسب قبيلة آل بوعينين - 2026م</span>
@@ -64,8 +64,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setCurrentView('home')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                 currentView === 'home'
-                  ? 'bg-gradient-to-r from-[#0F3D3E] to-[#155253] text-[#E5C384] border border-[#C5A059]/40 shadow-lg'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-[#0F3D3E] to-[#155253] text-[#E5C384] border border-[#C5A059]/40 shadow-md'
+                  : 'text-slate-700 hover:text-[#0F3D3E] hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-white/5'
               }`}
             >
               <Trees className="w-4 h-4 text-[#C5A059]" />
@@ -76,22 +76,22 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setCurrentView('form')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                 currentView === 'form'
-                  ? 'bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] shadow-lg shadow-[#C5A059]/20 font-bold'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] shadow-md shadow-[#C5A059]/20 font-bold'
+                  : 'text-slate-700 hover:text-[#0F3D3E] hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-white/5'
               }`}
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 text-[#C5A059]" />
               <span>تقديم تحديث جديد</span>
             </button>
 
-            <div className="w-[1px] h-6 bg-white/10 mx-1" />
+            <div className="w-[1px] h-6 bg-slate-200 dark:bg-white/10 mx-1" />
 
             <button
               onClick={() => setCurrentView('admin')}
               className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                 currentView === 'admin'
-                  ? 'bg-[#1b2742] text-[#E5C384] border border-[#C5A059]/60 shadow-xl'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#0F2942] text-[#E5C384] border border-[#C5A059]/60 shadow-md'
+                  : 'text-slate-700 hover:text-[#0F3D3E] hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-white/5'
               }`}
             >
               <ShieldCheck className="w-4 h-4 text-[#C5A059]" />
@@ -153,13 +153,13 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white/10 bg-[#070b14]/95 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-2">
+        <div className="md:hidden border-t border-slate-200 dark:border-white/10 bg-white/98 dark:bg-[#070b14]/95 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-2 shadow-xl">
           <button
             onClick={() => {
               setCurrentView('home');
               setMobileMenuOpen(false);
             }}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold bg-white/5 text-slate-200 hover:bg-white/10"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/10"
           >
             <span className="flex items-center gap-2">
               <Trees className="w-4 h-4 text-[#C5A059]" />
@@ -185,7 +185,7 @@ export const Header: React.FC<HeaderProps> = ({
               setCurrentView('admin');
               setMobileMenuOpen(false);
             }}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold bg-white/5 text-slate-200 hover:bg-white/10"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/10"
           >
             <span className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-[#C5A059]" />

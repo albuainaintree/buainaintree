@@ -29,6 +29,7 @@ export interface Submission {
   familyName: string;
   applicantName: string;
   applicantPhone: string;
+  applicantEmail?: string;
   persons: SubmissionPerson[];
   status: RequestStatus;
   createdAt: string;

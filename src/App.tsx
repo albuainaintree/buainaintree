@@ -25,7 +25,7 @@ export default function App() {
   const [previewFamily, setPreviewFamily] = useState<Family | null>(null);
   const [successSubmission, setSuccessSubmission] = useState<Submission | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false); // Default to bright royal palette
 
   // Admin authentication state
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
@@ -105,15 +105,15 @@ export default function App() {
     <div
       className={`min-h-screen flex flex-col transition-colors duration-300 ${
         isDarkMode
-          ? 'bg-[#070b14] text-slate-100'
-          : 'bg-[#F4F6F9] text-slate-800'
+          ? 'dark bg-[#070b14] text-slate-100'
+          : 'bg-gradient-to-b from-[#FBF9F5] via-[#F3F5F9] to-[#EAEFF6] text-slate-900'
       }`}
     >
       {/* Dynamic Background Mesh / Ambient Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 right-1/4 w-[600px] h-[600px] rounded-full bg-[#0F3D3E]/20 blur-[140px]" />
-        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-[#C5A059]/10 blur-[130px]" />
-        <div className="absolute bottom-10 right-10 w-[450px] h-[450px] rounded-full bg-[#1b2b4a]/25 blur-[120px]" />
+        <div className="absolute -top-40 right-1/4 w-[600px] h-[600px] rounded-full bg-[#C5A059]/10 dark:bg-[#0F3D3E]/20 blur-[140px]" />
+        <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] rounded-full bg-[#0F3D3E]/10 dark:bg-[#C5A059]/10 blur-[130px]" />
+        <div className="absolute bottom-10 right-10 w-[450px] h-[450px] rounded-full bg-[#1b2b4a]/10 dark:bg-[#1b2b4a]/25 blur-[120px]" />
       </div>
 
       {/* Main App Navigation Header */}
@@ -181,54 +181,17 @@ export default function App() {
 
       {/* Fullscreen Tree Preview Lightbox Modal */}
       {previewFamily && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-2xl animate-fade-in">
-          <div className="relative w-full max-w-6xl h-[90vh] rounded-3xl overflow-hidden border border-[#C5A059]/40 bg-[#070b14] shadow-2xl flex flex-col">
-            
-            {/* Modal Header */}
-            <div className="p-4 px-6 border-b border-white/10 flex items-center justify-between bg-[#0B1220]/80">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#0F3D3E] border border-[#C5A059]/40 flex items-center justify-center text-[#E5C384] font-bold text-sm">
-                  ع
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-white">
-                    مشجرة {previewFamily.name}
-                  </h3>
-                  <p className="text-xs text-[#C5A059]">
-                    {previewFamily.branch || 'قبيلة آل بوعينين'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedFamily(previewFamily);
-                    setPreviewFamily(null);
-                    setCurrentView('form');
-                  }}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-xs font-bold shadow hover:brightness-110 transition"
-                >
-                  تحديث بيانات هذه المشجرة
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPreviewFamily(null)}
-                  className="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Tree Viewer Area */}
-            <div className="flex-1 w-full h-full relative overflow-hidden">
-              <TreeViewer imageUrl={previewFamily.treeImageUrl} familyName={previewFamily.name} />
-            </div>
-          </div>
-        </div>
+        <TreeViewer
+          imageUrl={previewFamily.treeImageUrl}
+          familyName={previewFamily.name}
+          isInline={false}
+          onClose={() => setPreviewFamily(null)}
+          onUpdateClick={() => {
+            setSelectedFamily(previewFamily);
+            setPreviewFamily(null);
+            setCurrentView('form');
+          }}
+        />
       )}
 
       {/* Submission Success Modal */}

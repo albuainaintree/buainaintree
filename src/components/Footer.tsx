@@ -8,49 +8,52 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, isAdminLoggedIn = false }) => {
   return (
-    <footer className="w-full border-t border-[#C5A059]/20 bg-[#060A14] text-slate-400 text-xs py-10">
+    <footer className="w-full border-t border-[#C5A059]/20 bg-white/80 dark:bg-[#060A14] text-slate-600 dark:text-slate-400 text-xs py-10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3 text-center md:text-right">
-            <div className="w-10 h-10 rounded-xl bg-[#0F3D3E] border border-[#C5A059]/40 flex items-center justify-center text-[#E5C384] font-black font-tajawal text-lg">
+            <div className="w-10 h-10 rounded-xl bg-[#0F3D3E] border border-[#C5A059]/40 flex items-center justify-center text-[#E5C384] font-black font-tajawal text-lg shadow-sm">
               ع
             </div>
             <div>
-              <span className="text-sm font-bold text-white block">
+              <span className="text-sm font-bold text-slate-900 dark:text-white block">
                 مشروع تحديث شجرة نسب آل بوعينين - الطبعة السادسة
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                منصة جمع وتدقيق الأنساب والبيانات العائلية
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium">
             <button
               onClick={() => onNavigate('home')}
-              className="hover:text-[#E5C384] transition"
+              className="text-slate-700 dark:text-slate-300 hover:text-[#987836] dark:hover:text-[#E5C384] transition"
             >
               الأسر والمشجرات
             </button>
-            <span className="text-white/20">•</span>
+            <span className="text-slate-300 dark:text-white/20">•</span>
             <button
               onClick={() => onNavigate('form')}
-              className="hover:text-[#E5C384] transition"
+              className="text-slate-700 dark:text-slate-300 hover:text-[#987836] dark:hover:text-[#E5C384] transition"
             >
               تقديم تحديث
             </button>
-            <span className="text-white/20">•</span>
+            <span className="text-slate-300 dark:text-white/20">•</span>
             <button
               onClick={() => onNavigate('admin')}
-              className="hover:text-[#E5C384] transition"
+              className="text-slate-700 dark:text-slate-300 hover:text-[#987836] dark:hover:text-[#E5C384] transition"
             >
               لوحة تحكم المدير
             </button>
             
             {isAdminLoggedIn && (
               <>
-                <span className="text-white/20">•</span>
+                <span className="text-slate-300 dark:text-white/20">•</span>
                 <button
                   onClick={onOpenSettings}
-                  className="hover:text-[#E5C384] transition text-[#C5A059]"
+                  className="hover:text-[#987836] dark:hover:text-[#E5C384] transition text-[#987836] dark:text-[#C5A059] font-bold"
                 >
                   إعدادات السحاب
                 </button>
@@ -59,9 +62,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, isAd
           </div>
         </div>
 
-        <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
+        <div className="border-t border-slate-200 dark:border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 dark:text-slate-400 text-center sm:text-right">
           <p>
-            تنبيه: جميع البيانات الواردة في هذه المنصة تخضع لتدقيق ومراجعة قبل اعتمادها في الطبعة السادسة المطبوعة.
+            تنبيه: جميع البيانات والوثائق الواردة في هذه المنصة تخضع لتدقيق ومراجعة قبل اعتمادها في الطبعة السادسة المطبوعة.
+          </p>
+          <p className="font-mono" dir="ltr">
+            © {new Date().getFullYear()} Al-Buainain Tree Project
           </p>
         </div>
 

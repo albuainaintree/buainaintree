@@ -279,31 +279,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // -------------------------------------------------------------
-  // If Not Authenticated: Render Secure Apple Glass Login Screen
+  // If Not Authenticated: Render Secure Login Screen
   // -------------------------------------------------------------
   if (!isAdminLoggedIn) {
     return (
-      <div className="max-w-md mx-auto my-12 p-6 sm:p-8 rounded-3xl bg-[#09101F]/90 border border-[#C5A059]/40 backdrop-blur-2xl shadow-2xl space-y-6">
+      <div className="max-w-md mx-auto my-12 p-6 sm:p-8 rounded-3xl bg-white/95 dark:bg-[#09101F]/90 border border-[#C5A059]/40 backdrop-blur-2xl shadow-2xl space-y-6 transition-colors">
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0F3D3E] to-[#122238] border border-[#C5A059] flex items-center justify-center mx-auto text-[#E5C384] shadow-lg">
             <Lock className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-black text-white">تسجيل الدخول للوحة التحكم</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white">تسجيل الدخول للوحة التحكم</h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
             يرجى إدخال بيانات الاعتماد المخصصة لإدارة المشروع
           </p>
         </div>
 
         {loginError && (
-          <div className="p-3.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs flex items-start gap-2 animate-shake">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+          <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/80 border border-rose-300 dark:border-rose-500/50 text-rose-700 dark:text-rose-200 text-xs flex items-start gap-2 animate-shake">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500 dark:text-rose-400" />
             <p className="leading-relaxed font-medium">{loginError}</p>
           </div>
         )}
 
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-200">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
               اسم المستخدم
             </label>
             <div className="relative">
@@ -315,14 +315,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 required
                 value={usernameInput}
                 onChange={e => setUsernameInput(e.target.value)}
-                className="glass-input w-full rounded-xl pr-10 pl-4 py-3 text-sm text-white"
+                className="glass-input w-full rounded-xl pr-10 pl-4 py-3 text-sm text-slate-900 dark:text-white"
                 autoComplete="username"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-200">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
               كلمة المرور
             </label>
             <div className="relative">
@@ -334,13 +334,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 required
                 value={passwordInput}
                 onChange={e => setPasswordInput(e.target.value)}
-                className="glass-input w-full rounded-xl pr-10 pl-10 py-3 text-sm text-white font-mono"
+                className="glass-input w-full rounded-xl pr-10 pl-10 py-3 text-sm text-slate-900 dark:text-white font-mono"
                 autoComplete="current-password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 hover:text-white transition"
+                className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-white transition"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -350,7 +350,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           <button
             type="submit"
-            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-sm font-bold shadow-lg shadow-[#C5A059]/30 hover:brightness-110 active:scale-95 transition mt-2"
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-sm font-bold shadow-lg shadow-[#C5A059]/30 hover:brightness-110 active:scale-95 transition mt-2 cursor-pointer"
           >
             تسجيل الدخول
           </button>

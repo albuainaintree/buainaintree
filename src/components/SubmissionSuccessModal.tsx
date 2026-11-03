@@ -77,6 +77,13 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
           <p className="text-[11px] text-slate-400">
             يرجى الاحتفاظ بهذا الرقم أو تصوير الشاشة للمراجعة عند الحاجة.
           </p>
+
+          {submission.applicantEmail && (
+            <div className="pt-1 border-t border-white/10 flex items-center justify-center gap-1.5 text-[11px] text-emerald-400">
+              <Mail className="w-3.5 h-3.5" />
+              <span>تم إرسال إشعار تأكيد بالرقم المرجعي إلى: <strong className="font-mono text-white">{submission.applicantEmail}</strong></span>
+            </div>
+          )}
         </div>
 
         {/* Submission Summary Table */}
@@ -85,6 +92,12 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
             <span className="text-slate-400">مقدم الطلب:</span>
             <span className="font-bold text-white">{submission.applicantName}</span>
           </div>
+          {submission.applicantEmail && (
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <span className="text-slate-400">البريد الإلكتروني:</span>
+              <span className="font-mono text-slate-200" dir="ltr">{submission.applicantEmail}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between border-b border-white/10 pb-2">
             <span className="text-slate-400">رقم الجوال:</span>
             <span className="font-mono text-slate-200" dir="ltr">{submission.applicantPhone}</span>
