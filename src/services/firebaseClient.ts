@@ -140,3 +140,34 @@ export function subscribeToFirestore(
     return null;
   }
 }
+
+/**
+ * Fetch all families directly from Firestore once (for diagnostic and deep sync)
+ */
+export async function fetchAllFirestoreFamilies(): Promise<Family[]> {
+  const db = getFirestoreDB();
+  if (!db) return [];
+  try {
+    const snapshot = await db.collection('families').get();
+    return snapshot.docs.map(doc => doc.data() as Family);
+  } catch (err) {
+    console.warn('Direct Firestore families fetch notice:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetch all submissions directly from Firestore once
+ */
+export async function fetchAllFirestoreSubmissions(): Promise<Submission[]> {
+  const db = getFirestoreDB();
+  if (!db) return [];
+  try {
+    const snapshot = await db.collection('submissions').get();
+    return snapshot.docs.map(doc => doc.data() as Submission);
+  } catch (err) {
+    console.warn('Direct Firestore submissions fetch notice:', err);
+    return [];
+  }
+}
+

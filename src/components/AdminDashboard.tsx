@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Family, Submission, SubmissionPerson, RequestStatus, LineageStatus } from '../types';
 import { 
   updateSubmissionStatus, 
@@ -6,7 +6,11 @@ import {
   upsertFamily, 
   deleteFamily,
   exportSiteBackup,
-  importSiteBackup
+  importSiteBackup,
+  deepScanAndRecoverAll,
+  getStorageDiagnosticInfo,
+  bulkAddFamilies,
+  StorageDiagnosticInfo
 } from '../services/storage';
 import { exportDatabaseToExcel } from '../services/excelExport';
 import { getLineageStatusLabel } from '../services/emailService';
@@ -36,7 +40,13 @@ import {
   Key,
   Eye,
   EyeOff,
-  Mail
+  Mail,
+  Layers,
+  ListPlus,
+  RotateCw,
+  FileText,
+  CheckCircle2,
+  HardDrive
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -74,6 +84,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [familyFilter, setFamilyFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Family Search in Admin Tab
+  const [familySearchQuery, setFamilySearchQuery] = useState('');
+
   // Editing Person Modal State
   const [editingPerson, setEditingPerson] = useState<{
     submissionId: string;
@@ -86,11 +99,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     family: Partial<Family> | null;
   }>({ isOpen: false, family: null });
 
+  // Bulk Add Families Modal State
+  const [showBulkAddModal, setShowBulkAddModal] = useState(false);
+  const [bulkAddText, setBulkAddText] = useState('');
+  const [bulkDefaultClan, setBulkDefaultClan] = useState('');
+
+  // Deep Recovery & Storage Diagnostics States
+  const [isRecovering, setIsRecovering] = useState(false);
+  const [diagnosticInfo, setDiagnosticInfo] = useState<StorageDiagnosticInfo | null>(null);
+
   // Excel & Backup States
   const [isExporting, setIsExporting] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [statusNotice, setStatusNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const backupFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load diagnostic info when viewing families tab
+  useEffect(() => {
+    if (activeTab === 'families') {
+      getStorageDiagnosticInfo().then(setDiagnosticInfo);
+    }
+  }, [activeTab, families.length]);
+
 
   // Metrics
   const stats = useMemo(() => {
@@ -252,9 +282,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       }
     };
     reader.readAsText(file);
-    // Reset input
     e.target.value = '';
   };
+
+  // Deep Scan and Recover All Families across LocalStorage, IndexedDB & Firebase
+  const handleDeepScanAndRecover = async () => {
+    setIsRecovering(true);
+    setStatusNotice(null);
+    try {
+      const result = await deepScanAndRecoverAll();
+      onRefreshData();
+      setDiagnosticInfo(result.sources);
+      setStatusNotice({
+        type: 'success',
+        message: `${result.message} تم تأمين وحفظ البيانات في التخزين فائق السعة والسحابة بنجاح.`,
+      });
+    } catch (err) {
+      console.error('Error during deep recovery:', err);
+      setStatusNotice({
+        type: 'error',
+        message: 'تعذر إتمام الفحص الشامل، يرجى المحاولة مرة أخرى.',
+      });
+    } finally {
+      setIsRecovering(false);
+      setTimeout(() => setStatusNotice(null), 9000);
+    }
+  };
+
+  // Bulk Add Families
+  const handleExecuteBulkAdd = () => {
+    if (!bulkAddText.trim()) return;
+    const res = bulkAddFamilies(bulkAddText, bulkDefaultClan);
+    onRefreshData();
+    setShowBulkAddModal(false);
+    setBulkAddText('');
+    setStatusNotice({
+      type: 'success',
+      message: `تمت معالجة القائمة: تم إضافة ${res.addedCount} أسرة جديدة وتوليد مشجراتها، وتخطي ${res.existingCount} أسرة مسجلة مسبقاً. إجمالي الأسر الآن: ${res.totalCount}.`,
+    });
+    setTimeout(() => setStatusNotice(null), 9000);
+  };
+
+  // Filtered families in Admin Tab
+  const filteredAdminFamilies = useMemo(() => {
+    if (!familySearchQuery.trim()) return families;
+    const q = familySearchQuery.toLowerCase().trim();
+    return families.filter(f => 
+      f.name.toLowerCase().includes(q) || 
+      (f.branch && f.branch.toLowerCase().includes(q))
+    );
+  }, [families, familySearchQuery]);
+
 
   // Upload Tree Image (Compressed & Optimized for High Capacity)
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -514,14 +592,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         {activeTab === 'families' && (
-          <button
-            type="button"
-            onClick={() => setFamilyModal({ isOpen: true, family: { name: '', branch: '' } })}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0F3D3E] to-[#1A5F60] border border-[#C5A059]/40 text-xs font-bold text-[#E5C384] hover:brightness-110 shadow-lg"
-          >
-            <Plus className="w-4 h-4" />
-            <span>إضافة أسرة جديدة</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDeepScanAndRecover}
+              disabled={isRecovering}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-950/70 hover:bg-sky-900 border border-sky-400/40 text-xs font-bold text-sky-200 transition active:scale-95 shadow"
+              title="فحص شامل ومزامنة كافة الأسر من السحابة والتخزين فائق السعة"
+            >
+              <RotateCw className={`w-3.5 h-3.5 ${isRecovering ? 'animate-spin text-sky-300' : 'text-sky-400'}`} />
+              <span>{isRecovering ? 'جاري الفحص والمزامنة...' : 'فحص ومزامنة الأسر'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowBulkAddModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0F3D3E] hover:bg-[#165556] border border-[#C5A059]/40 text-xs font-bold text-[#E5C384] transition active:scale-95 shadow"
+              title="إضافة أو استكمال عدة أسر دفعة واحدة من قائمة أسماء"
+            >
+              <ListPlus className="w-3.5 h-3.5 text-[#C5A059]" />
+              <span>إضافة جماعية (لصق قائمة)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFamilyModal({ isOpen: true, family: { name: '', branch: '' } })}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-xs font-black hover:brightness-110 shadow-lg active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span>إضافة أسرة</span>
+            </button>
+          </div>
         )}
       </div>
 
@@ -772,6 +873,92 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'families' && (
         <div className="space-y-6">
+
+          {/* Storage & Cloud Sync Diagnostic Status Card */}
+          <div className="rounded-2xl p-5 bg-[#09101F]/90 border border-[#C5A059]/30 shadow-lg space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <HardDrive className="w-5 h-5 text-[#C5A059]" />
+                <h3 className="text-sm font-bold text-white">حالة تخزين ومزامنة المشجرات عبر السحابة والذاكرة</h3>
+              </div>
+              <button
+                type="button"
+                onClick={handleDeepScanAndRecover}
+                disabled={isRecovering}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sky-950/80 hover:bg-sky-900 border border-sky-400/50 text-xs font-bold text-sky-200 transition active:scale-95 shadow cursor-pointer"
+              >
+                <RotateCw className={`w-3.5 h-3.5 ${isRecovering ? 'animate-spin text-sky-300' : 'text-sky-400'}`} />
+                <span>{isRecovering ? 'جاري الفحص واسترجاع الأسر...' : 'استرجاع ومزامنة كافة الأسر من كافة المصادر'}</span>
+              </button>
+            </div>
+
+            {/* Diagnostic Metrics Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] text-slate-400 block mb-0.5">المنصة والذاكرة الحالية</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-black text-[#E5C384]">{families.length}</span>
+                  <span className="text-[10px] text-slate-500">أسرة ظاهرة</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] text-slate-400 block mb-0.5">تخزين فائق السعة (IndexedDB)</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-black text-emerald-400">{diagnosticInfo?.indexedDbCount ?? families.length}</span>
+                  <span className="text-[10px] text-emerald-500/80">مشجرة مؤمنة</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] text-slate-400 block mb-0.5">المحلي والنسخ السابقة</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-black text-sky-400">{diagnosticInfo?.historicalLocalStorageCount ?? families.length}</span>
+                  <span className="text-[10px] text-sky-500/80">سجل مفحوص</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] text-slate-400 block mb-0.5">سحابة Firebase Firestore</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-black text-purple-400">{diagnosticInfo?.firestoreCount ?? 'متصل'}</span>
+                  <span className="text-[10px] text-purple-400/80">سجل سحابي</span>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed border-t border-white/10 pt-3">
+              💡 <strong className="text-slate-300">ملاحظة أمان البيانات:</strong> تم إلغاء قيود المتصفح (5MB)، وأصبح النظام يستخدم التخزين فائق السعة (IndexedDB) بالتكامل المباشر مع سحابة Firebase، مما يضمن حفظ واستعراض مئات الأسر ومشاركتها دون أي نقص أو حد لعدد المشجرات.
+            </p>
+          </div>
+
+          {/* Families Search Bar in Admin */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:max-w-md">
+              <Search className="w-4 h-4 absolute right-3.5 top-3 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={familySearchQuery}
+                onChange={e => setFamilySearchQuery(e.target.value)}
+                placeholder="ابحث بين الأسر بالاسم أو الفخذ..."
+                className="glass-input w-full rounded-xl pr-10 pl-3 py-2 text-xs text-white placeholder-slate-400"
+              />
+              {familySearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setFamilySearchQuery('')}
+                  className="absolute left-3 top-2.5 text-xs text-slate-400 hover:text-white"
+                >
+                  مسح
+                </button>
+              )}
+            </div>
+
+            <div className="text-xs text-slate-400">
+              عرض <strong className="text-white">{filteredAdminFamilies.length}</strong> من أصل <strong className="text-[#E5C384]">{families.length}</strong> أسرة مسجلة
+            </div>
+          </div>
+
           {families.length === 0 ? (
             <div className="text-center py-16 px-6 rounded-3xl bg-[#09101F]/80 border border-white/10 max-w-lg mx-auto space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-[#0F3D3E] border border-[#C5A059]/40 flex items-center justify-center mx-auto text-[#E5C384]">
@@ -779,7 +966,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
               <h3 className="text-lg font-bold text-white">لا توجد أسر مسجلة حالياً</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                قائمة الأسر فارغة وجاهزة لتقوم بتسجيل الأسر ورفع صور مشجراتها الجديدة بدقة، أو يمكنك استيراد نسخة احتياطية سابقة.
+                يمكنك الضغط على زر استرجاع الأسر لمزامنة كافة الأسر، أو إضافة الأسر بشكل فردي أو جماعي.
               </p>
               <div className="flex items-center justify-center gap-3 pt-2">
                 <button
@@ -787,20 +974,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={() => setFamilyModal({ isOpen: true, family: { name: '', branch: '' } })}
                   className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-xs font-bold shadow-lg"
                 >
-                  + تسجيل أول أسرة الآن
+                  + تسجيل أسرة جديدة
                 </button>
                 <button
                   type="button"
-                  onClick={() => backupFileInputRef.current?.click()}
-                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-semibold border border-white/10"
+                  onClick={() => setShowBulkAddModal(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#0F3D3E] text-[#E5C384] text-xs font-bold border border-[#C5A059]/40"
                 >
-                  استيراد نسخة سابقة
+                  لصق قائمة جماعية
                 </button>
               </div>
             </div>
+          ) : filteredAdminFamilies.length === 0 ? (
+            <div className="text-center py-12 rounded-2xl bg-white/5 border border-white/10">
+              <p className="text-slate-300 text-sm font-semibold">لم يتم العثور على أسر مطابقة لبحثك</p>
+              <button
+                type="button"
+                onClick={() => setFamilySearchQuery('')}
+                className="mt-2 text-xs text-[#C5A059] hover:underline"
+              >
+                مسح البحث وعرض كافة الأسر ({families.length})
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {families.map(fam => (
+              {filteredAdminFamilies.map(fam => (
                 <div
                   key={fam.id}
                   className="rounded-2xl p-5 bg-[#09101F]/80 border border-white/15 space-y-4 hover:border-[#C5A059]/40 transition flex flex-col justify-between"
@@ -1098,6 +1296,85 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: BULK ADD FAMILIES (PASTE LIST) */}
+      {/* ========================================================================= */}
+      {showBulkAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="w-full max-w-xl rounded-3xl p-6 bg-[#0E1A30] border border-[#C5A059]/50 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <ListPlus className="w-5 h-5 text-[#C5A059]" />
+                <h3 className="text-base font-bold text-white">إضافة جماعية سريعة للأسر (لصق قائمة)</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBulkAddModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              إذا كانت لديك قائمة بالأسر الـ 64 أو الأسر المتبقية، يمكنك لصق أسمائها هنا مباشرة. سيقوم النظام بتسجيلها وتوليد مشجراتها الرسمية وتأمينها في التخزين فائق السعة والسحابة دون تكرار الأسر الموجودة مسبقاً.
+            </p>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-200">
+                  قائمة الأسر (اكتب أو الصق كل اسم في سطر، ويمكنك كتابة الفخذ بعد علامة |):
+                </label>
+                <textarea
+                  rows={8}
+                  value={bulkAddText}
+                  onChange={e => setBulkAddText(e.target.value)}
+                  placeholder={`مثال:\nآل جبران | فخذ آل علي\nآل خاطر\nآل عيسى\nآل راشد`}
+                  className="glass-input w-full rounded-xl p-3 text-xs text-white font-mono leading-relaxed placeholder-slate-500"
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-200">
+                  الفخذ الافتراضي (اختياري - يطبق على الأسر التي لم يُحدد لها فخذ):
+                </label>
+                <input
+                  type="text"
+                  value={bulkDefaultClan}
+                  onChange={e => setBulkDefaultClan(e.target.value)}
+                  placeholder="مثال: آل علي، آل حسن..."
+                  className="glass-input w-full rounded-xl px-3.5 py-2 text-xs text-white"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-sky-950/40 border border-sky-500/30 text-[11px] text-sky-200 flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+                <span>النظام سيتخطى تلقائياً أي أسرة مضافة مسبقاً لمنع التكرار، وسيضيف الأسر الجديدة فقط.</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setShowBulkAddModal(false)}
+                className="px-4 py-2 rounded-xl bg-white/5 text-xs text-slate-300"
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteBulkAdd}
+                disabled={!bulkAddText.trim()}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#987836] text-[#0A0F1D] text-xs font-bold hover:brightness-110 active:scale-95 disabled:opacity-50 transition cursor-pointer"
+              >
+                إضافة وتوليد المشجرات فوراً
+              </button>
+            </div>
           </div>
         </div>
       )}

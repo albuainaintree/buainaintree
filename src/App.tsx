@@ -15,6 +15,7 @@ import { TreeViewer } from './components/TreeViewer';
 import { SubmissionSuccessModal } from './components/SubmissionSuccessModal';
 import { ConfigModal } from './components/ConfigModal';
 import { Footer } from './components/Footer';
+import { generateFamilyTreeSvg } from './data/mockFamilies';
 import { X, Sparkles } from 'lucide-react';
 
 export default function App() {
@@ -182,7 +183,7 @@ export default function App() {
       {/* Fullscreen Tree Preview Lightbox Modal */}
       {previewFamily && (
         <TreeViewer
-          imageUrl={previewFamily.treeImageUrl}
+          imageUrl={previewFamily.treeImageUrl || generateFamilyTreeSvg(previewFamily.name, previewFamily.branch || '')}
           familyName={previewFamily.name}
           isInline={false}
           onClose={() => setPreviewFamily(null)}

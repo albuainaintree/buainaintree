@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Family } from '../types';
+import { generateFamilyTreeSvg } from '../data/mockFamilies';
 import { Search, Eye, ArrowLeft, Sparkles, Plus, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface FamiliesGridProps {
@@ -195,7 +196,7 @@ export const FamiliesGrid: React.FC<FamiliesGridProps> = ({
                       title="اضغط للتكبير واستعراض المشجرة بملء الشاشة"
                     >
                       <img
-                        src={fam.treeImageUrl}
+                        src={fam.treeImageUrl || generateFamilyTreeSvg(fam.name, fam.branch || '')}
                         alt={`مشجرة ${fam.name}`}
                         className="w-full h-full object-cover object-top opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
                       />
