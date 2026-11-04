@@ -366,6 +366,27 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, onCon
                 />
               </div>
             </div>
+
+            {/* Firestore Security Rules Note */}
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 font-bold text-amber-700 dark:text-amber-300">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>قواعد أمان Firebase Firestore (للسماح بالمزامنة الحية):</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                لكي تنتقل الطلبات والمشجرات متزامنة بين المتصفح و GitHub Pages، تأكد من الدخول إلى Firebase Console ثم Cloud Firestore ⬅️ تبويب Rules (القواعد) وتعيينها للسماح بالقراءة والكتابة:
+              </p>
+              <pre className="p-2 rounded-lg bg-black/60 text-[#E5C384] text-[10px] font-mono overflow-x-auto text-left" dir="ltr">
+{`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}`}
+              </pre>
+            </div>
           </div>
 
           {/* Action buttons */}

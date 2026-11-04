@@ -166,9 +166,9 @@ export const FamiliesGrid: React.FC<FamiliesGridProps> = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-              {filteredFamilies.map(fam => (
+              {filteredFamilies.map((fam, idx) => (
                 <div
-                  key={fam.id}
+                  key={`${fam.id || 'fam'}-${fam.name}-${idx}`}
                   className="glass-card group relative rounded-2xl overflow-hidden p-4 sm:p-5 flex flex-col justify-between"
                 >
                   <div className="space-y-3">

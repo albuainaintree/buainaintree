@@ -10,8 +10,10 @@ import {
   deepScanAndRecoverAll,
   getStorageDiagnosticInfo,
   bulkAddFamilies,
+  forceSyncAllToCloud,
   StorageDiagnosticInfo
 } from '../services/storage';
+import { subscribeToCloudStatus, CloudSyncStatus } from '../services/firebaseClient';
 import { exportDatabaseToExcel } from '../services/excelExport';
 import { getLineageStatusLabel } from '../services/emailService';
 import { generateFamilyTreeSvg } from '../data/mockFamilies';
@@ -46,7 +48,9 @@ import {
   RotateCw,
   FileText,
   CheckCircle2,
-  HardDrive
+  HardDrive,
+  Cloud,
+  CloudUpload
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -107,6 +111,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Deep Recovery & Storage Diagnostics States
   const [isRecovering, setIsRecovering] = useState(false);
   const [diagnosticInfo, setDiagnosticInfo] = useState<StorageDiagnosticInfo | null>(null);
+
+  // Cloud Live Status
+  const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>('checking');
+  const [cloudLastSync, setCloudLastSync] = useState<string | undefined>();
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+
+  useEffect(() => {
+    const unsub = subscribeToCloudStatus((status, details) => {
+      setCloudStatus(status);
+      setCloudLastSync(details?.lastSync);
+    });
+    return unsub;
+  }, []);
 
   // Excel & Backup States
   const [isExporting, setIsExporting] = useState(false);
@@ -250,39 +267,63 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }, 200);
   };
 
-  // Export Complete Site Backup (JSON)
+  // Export Complete Site Database Backup (JSON)
   const handleExportFullBackup = () => {
     const res = exportSiteBackup();
     setStatusNotice({
       type: 'success',
-      message: `تم تنزيل النسخة الاحتياطية الكاملة (${res.filename}). يمكنك استخدامها لاستعادة كافة الأسر والمشجرات والمدخلات في أي وقت.`,
+      message: `تم تصدير نسخة احتياطية كاملة لقاعدة البيانات (${res.filename}). تشمل كافة الأسر والمشجرات بكامل دقتها و ${res.submissionsCount} طلب تحديث.`,
     });
-    setTimeout(() => setStatusNotice(null), 7000);
+    setTimeout(() => setStatusNotice(null), 8000);
   };
 
-  // Import Site Backup (JSON)
+  // Import Site Backup (JSON) with instant Cloud Sync
   const handleImportBackupFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const content = event.target?.result as string;
       if (content) {
-        if (confirm('تنبيه: سيؤدي استيراد النسخة الاحتياطية إلى استرجاع الأسر والمشجرات والطلبات من الملف. هل ترغب بالمتابعة؟')) {
-          const res = importSiteBackup(content);
+        if (confirm('تنبيه: سيؤدي استيراد النسخة الاحتياطية إلى استرجاع وتحديث كافة الأسر والمشجرات والطلبات ومزامنتها مباشرة مع سحابة Firebase ومنصة GitHub Pages. هل ترغب بالمتابعة؟')) {
+          setStatusNotice({ type: 'success', message: 'جاري استيراد ومزامنة قاعدة البيانات...' });
+          const res = await importSiteBackup(content);
           if (res.success) {
             onRefreshData();
             setStatusNotice({ type: 'success', message: res.message });
           } else {
             setStatusNotice({ type: 'error', message: res.message });
           }
-          setTimeout(() => setStatusNotice(null), 7000);
+          setTimeout(() => setStatusNotice(null), 9000);
         }
       }
     };
     reader.readAsText(file);
     e.target.value = '';
+  };
+
+  // Manual Trigger: Force Sync all local data to Firebase Firestore Cloud
+  const handleForceCloudSync = async () => {
+    setIsSyncingCloud(true);
+    setStatusNotice(null);
+    try {
+      const res = await forceSyncAllToCloud();
+      onRefreshData();
+      setStatusNotice({
+        type: res.success ? 'success' : 'error',
+        message: res.message,
+      });
+    } catch (err: unknown) {
+      console.error('Error during cloud sync:', err);
+      setStatusNotice({
+        type: 'error',
+        message: 'تعذر إتمام المزامنة السحابية، يرجى المحاولة مرة أخرى.',
+      });
+    } finally {
+      setIsSyncingCloud(false);
+      setTimeout(() => setStatusNotice(null), 9000);
+    }
   };
 
   // Deep Scan and Recover All Families across LocalStorage, IndexedDB & Firebase
@@ -458,12 +499,54 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               لوحة إدارة مشروع شجرة آل بوعينين
             </h1>
             <p className="text-xs sm:text-sm text-slate-300">
-              تدقيق ومراجعة الطلبات، تعديل واعتماد الأسماء، وإدارة الأسر والمشجرات، والنسخ الاحتياطي الكامل.
+              تدقيق ومراجعة الطلبات، تعديل واعتماد الأسماء، وإدارة الأسر والمشجرات، والمزامنة السحابية الحية مع منصة GitHub Pages.
             </p>
+
+            {/* Cloud Sync Status Indicator */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {cloudStatus === 'connected' ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>متصل بسحابة Firebase (مزامنة مباشرة وفورية مع GitHub Pages)</span>
+                </span>
+              ) : cloudStatus === 'permission_denied' ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>قواعد Firebase Firestore تتطلب تفعيل القراءة والكتابة للجميع</span>
+                </span>
+              ) : cloudStatus === 'checking' ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                  <span>جاري المزامنة مع السحابة...</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                  <span className="w-2 h-2 rounded-full bg-rose-400" />
+                  <span>السحابة غير متصلة</span>
+                </span>
+              )}
+              {cloudLastSync && (
+                <span className="text-[11px] text-slate-400">
+                  (آخر مزامنة: {cloudLastSync})
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Quick Actions (Major Excel Export + Full Backup/Restore) */}
+          {/* Quick Actions (Major Excel Export + Full Backup/Restore + Cloud Sync) */}
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* Direct Cloud Sync Button with GitHub Pages */}
+            <button
+              type="button"
+              onClick={handleForceCloudSync}
+              disabled={isSyncingCloud}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-600 hover:to-indigo-600 text-white border border-blue-400/40 text-xs sm:text-sm font-bold shadow-lg transition active:scale-95 cursor-pointer"
+              title="مزامنة فورية لكافة الأسر والطلبات مع سحابة Firebase ومنصة GitHub Pages"
+            >
+              <RotateCw className={`w-4 h-4 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+              <span>{isSyncingCloud ? 'جاري المزامنة...' : 'مزامنة مع السحابة و GitHub'}</span>
+            </button>
+
             {/* Excel Export */}
             <button
               type="button"
@@ -675,8 +758,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 className="w-full rounded-xl px-3 py-2.5 bg-[#0F1A30] border border-white/10 text-white text-xs focus:outline-none focus:border-[#C5A059]"
               >
                 <option value="all">كافة الأسر ({families.length})</option>
-                {families.map(f => (
-                  <option key={f.id} value={f.id}>
+                {families.map((f, idx) => (
+                  <option key={`${f.id}-${idx}`} value={f.id}>
                     {f.name}
                   </option>
                 ))}
@@ -692,9 +775,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredSubmissions.map(sub => (
+              {filteredSubmissions.map((sub, idx) => (
                 <div
-                  key={sub.id}
+                  key={`${sub.id}-${idx}`}
                   className="rounded-2xl p-5 sm:p-6 bg-[#09101F]/80 border border-white/15 space-y-4 hover:border-[#C5A059]/40 transition"
                 >
                   {/* Request Header */}
@@ -783,7 +866,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <div className="space-y-2">
                       {sub.persons.map((person, idx) => (
                         <div
-                          key={person.id}
+                          key={`${person.id || 'p'}-${idx}`}
                           className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-black/40 border border-white/5 hover:border-white/15"
                         >
                           <div className="space-y-1">
@@ -998,9 +1081,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAdminFamilies.map(fam => (
+              {filteredAdminFamilies.map((fam, idx) => (
                 <div
-                  key={fam.id}
+                  key={`${fam.id || 'fam'}-${idx}`}
                   className="rounded-2xl p-5 bg-[#09101F]/80 border border-white/15 space-y-4 hover:border-[#C5A059]/40 transition flex flex-col justify-between"
                 >
                   <div className="space-y-2">

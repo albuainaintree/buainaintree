@@ -6,7 +6,8 @@ import {
   syncSubmissionToFirestore, 
   subscribeToFirestore,
   fetchAllFirestoreFamilies,
-  fetchAllFirestoreSubmissions
+  fetchAllFirestoreSubmissions,
+  pushAllLocalDataToFirestore
 } from './firebaseClient';
 import { generateFamilyTreeSvg } from '../data/mockFamilies';
 
@@ -91,69 +92,135 @@ function normalizeName(name: string): string {
 
 /**
  * Merges two lists of families without losing any record or image data.
- * If a family exists in both, keeps the record with the most complete details.
+ * Matches by normalized family name OR existing ID, merges details without loss,
+ * and strictly guarantees zero duplicate IDs and zero duplicate names in the output.
  */
 export function mergeFamiliesList(listA: Family[], listB: Family[]): Family[] {
-  const map = new Map<string, Family>();
+  const all = [...(listA || []), ...(listB || [])];
+  const items: Family[] = [];
 
-  const processItem = (f: Family) => {
-    if (!f || !f.name) return;
-    const norm = normalizeName(f.name);
-    if (!norm) return;
+  for (const raw of all) {
+    if (!raw) continue;
+    const norm = normalizeName(raw.name);
+    if (!norm) continue;
 
-    const existing = map.get(norm);
-    if (!existing) {
-      map.set(norm, { ...f, name: norm });
+    const rawId = (raw.id && String(raw.id).trim()) || '';
+    const f: Family = {
+      ...raw,
+      id: rawId,
+      name: norm,
+      branch: (raw.branch || '').trim(),
+      treeImageUrl: raw.treeImageUrl || '',
+      membersCount: raw.membersCount || 100,
+      lastUpdated: raw.lastUpdated || 'النسخة الخامسة',
+    };
+
+    // Find existing match by either normalized name OR non-empty ID
+    const matchIndex = items.findIndex(
+      item => item.name === f.name || (f.id !== '' && item.id !== '' && item.id === f.id)
+    );
+
+    if (matchIndex === -1) {
+      items.push(f);
     } else {
-      // Keep best treeImageUrl (longer string = higher resolution / uploaded file)
+      const existing = items[matchIndex];
       const fImgLen = (f.treeImageUrl || '').length;
       const exImgLen = (existing.treeImageUrl || '').length;
       const bestImage = fImgLen > exImgLen ? f.treeImageUrl : existing.treeImageUrl;
 
-      map.set(norm, {
+      items[matchIndex] = {
         ...existing,
         ...f,
         id: existing.id || f.id,
-        name: norm,
+        name: norm || existing.name,
         branch: f.branch || existing.branch || '',
         treeImageUrl: bestImage,
         membersCount: f.membersCount || existing.membersCount || 100,
         lastUpdated: f.lastUpdated || existing.lastUpdated || 'النسخة الخامسة',
-      });
+      };
     }
-  };
+  }
 
-  (listA || []).forEach(processItem);
-  (listB || []).forEach(processItem);
+  // Ensure every item has a strictly unique non-empty ID
+  const seenIds = new Set<string>();
+  const result: Family[] = [];
 
-  return Array.from(map.values());
+  for (let i = 0; i < items.length; i++) {
+    const item = { ...items[i] };
+    if (!item.id || seenIds.has(item.id)) {
+      item.id = `fam-${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+    seenIds.add(item.id);
+    result.push(item);
+  }
+
+  return result;
 }
 
 /**
- * Merges two lists of submissions by reference number or ID
+ * Merges two lists of submissions by reference number or ID,
+ * and guarantees strictly unique IDs and persons IDs.
  */
 export function mergeSubmissionsList(listA: Submission[], listB: Submission[]): Submission[] {
-  const map = new Map<string, Submission>();
+  const all = [...(listA || []), ...(listB || [])];
+  const items: Submission[] = [];
 
-  const processSub = (s: Submission) => {
-    if (!s) return;
-    const key = s.referenceNumber || s.id;
-    if (!key) return;
+  for (const raw of all) {
+    if (!raw) continue;
+    const ref = (raw.referenceNumber || '').trim();
+    const id = (raw.id || '').trim();
+    if (!ref && !id) continue;
 
-    const existing = map.get(key);
-    if (!existing) {
-      map.set(key, s);
+    const matchIndex = items.findIndex(
+      item => (ref !== '' && item.referenceNumber === ref) || (id !== '' && item.id === id)
+    );
+
+    if (matchIndex === -1) {
+      items.push({
+        ...raw,
+        id: id || `sub-${Date.now()}-${items.length + 1}-${Math.random().toString(36).slice(2, 6)}`,
+        referenceNumber: ref || `BA-6E-${Math.floor(10000 + Math.random() * 90000)}`,
+        persons: (raw.persons || []).map((p, pIdx) => ({
+          ...p,
+          id: p.id || `p-${Date.now()}-${pIdx + 1}-${Math.random().toString(36).slice(2, 5)}`,
+        })),
+      });
     } else {
-      // Keep newer or more updated record
-      const isIncomingNewer = (s.updatedAt || s.createdAt || '') >= (existing.updatedAt || existing.createdAt || '');
-      map.set(key, isIncomingNewer ? { ...existing, ...s } : existing);
+      const existing = items[matchIndex];
+      const isIncomingNewer = (raw.updatedAt || raw.createdAt || '') >= (existing.updatedAt || existing.createdAt || '');
+      const merged: Submission = isIncomingNewer ? { ...existing, ...raw } : { ...raw, ...existing };
+      merged.id = existing.id || raw.id;
+      merged.referenceNumber = existing.referenceNumber || raw.referenceNumber;
+
+      // Ensure unique person IDs within the submission
+      const seenPIds = new Set<string>();
+      merged.persons = (merged.persons || []).map((p, pIdx) => {
+        let pId = p.id;
+        if (!pId || seenPIds.has(pId)) {
+          pId = `${pId || 'p'}-${pIdx + 1}-${Math.random().toString(36).slice(2, 5)}`;
+        }
+        seenPIds.add(pId);
+        return { ...p, id: pId };
+      });
+
+      items[matchIndex] = merged;
     }
-  };
+  }
 
-  (listA || []).forEach(processSub);
-  (listB || []).forEach(processSub);
+  // Guarantee strictly unique submission IDs
+  const seenIds = new Set<string>();
+  const result: Submission[] = [];
 
-  return Array.from(map.values());
+  for (let i = 0; i < items.length; i++) {
+    const item = { ...items[i] };
+    if (!item.id || seenIds.has(item.id)) {
+      item.id = `sub-${Date.now()}-${i + 1}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+    seenIds.add(item.id);
+    result.push(item);
+  }
+
+  return result;
 }
 
 /**
@@ -278,6 +345,10 @@ try {
       memorySubmissions = mergeSubmissionsList(memorySubmissions, parsed);
     }
   }
+
+  // Ensure initial cache is strictly cleansed of duplicate IDs or colliding records
+  memoryFamilies = mergeFamiliesList(memoryFamilies, []);
+  memorySubmissions = mergeSubmissionsList(memorySubmissions, []);
 } catch (e) {
   console.warn('Initial localStorage parse notice:', e);
 }
@@ -358,12 +429,46 @@ export async function initStorage(): Promise<void> {
       (remoteSubs) => {
         if (remoteSubs && remoteSubs.length > 0) {
           const merged = mergeSubmissionsList(memorySubmissions, remoteSubs);
+          const hadChanges = merged.length !== memorySubmissions.length;
           memorySubmissions = merged;
           idbSet('submissions', merged);
-          window.dispatchEvent(new Event('albuainain_submissions_updated'));
+          try {
+            localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(merged));
+          } catch {
+            // ignore
+          }
+
+          // If local has submissions that Firestore doesn't, sync them up to the cloud!
+          if (merged.length > remoteSubs.length) {
+            merged.forEach(s => syncSubmissionToFirestore(s));
+          }
+
+          if (hadChanges) {
+            window.dispatchEvent(new Event('albuainain_submissions_updated'));
+          }
         }
       }
     );
+
+    // Initial direct fetch to ensure instant display on fresh tabs
+    fetchAllFirestoreFamilies().then(fams => {
+      if (fams && fams.length > 0) {
+        const merged = mergeFamiliesList(memoryFamilies, fams);
+        memoryFamilies = merged;
+        idbSet('families', merged);
+        saveToLocalStorageSafely(merged);
+        window.dispatchEvent(new Event('albuainain_families_updated'));
+      }
+    }).catch(() => {});
+
+    fetchAllFirestoreSubmissions().then(subs => {
+      if (subs && subs.length > 0) {
+        const merged = mergeSubmissionsList(memorySubmissions, subs);
+        memorySubmissions = merged;
+        idbSet('submissions', merged);
+        window.dispatchEvent(new Event('albuainain_submissions_updated'));
+      }
+    }).catch(() => {});
   } catch (err) {
     console.warn('Storage hydration warning:', err);
   }
@@ -379,15 +484,13 @@ if (typeof window !== 'undefined') {
 // -------------------------------------------------------------
 
 export function loadFamilies(): Family[] {
+  memoryFamilies = mergeFamiliesList(memoryFamilies, []);
   return memoryFamilies;
 }
 
 export function saveFamilies(families: Family[]): void {
-  // Ensure names are trimmed and normalized
-  const sanitized = families.map(f => ({
-    ...f,
-    name: normalizeName(f.name),
-  }));
+  // Guarantee deduplication by name/ID and strict ID uniqueness
+  const sanitized = mergeFamiliesList(families, []);
 
   memoryFamilies = sanitized;
 
@@ -407,11 +510,14 @@ export function saveFamilies(families: Family[]): void {
 }
 
 export function loadSubmissions(): Submission[] {
+  memorySubmissions = mergeSubmissionsList(memorySubmissions, []);
   return memorySubmissions;
 }
 
 export function saveSubmissions(submissions: Submission[]): void {
-  memorySubmissions = submissions;
+  // Guarantee deduplication by referenceNumber/ID and strict ID uniqueness
+  const sanitized = mergeSubmissionsList(submissions, []);
+  memorySubmissions = sanitized;
 
   // 1. Sync to Firebase Firestore cloud database
   submissions.forEach(s => syncSubmissionToFirestore(s));
@@ -551,12 +657,12 @@ export function upsertFamily(familyData: { id?: string; name: string; branch?: s
     return updated;
   } else {
     const newFamily: Family = {
-      id: `fam-${Date.now()}`,
+      id: `fam-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name: familyData.name,
       branch: familyData.branch || '', // الفخذ
       treeImageUrl: familyData.treeImageUrl || '',
       membersCount: familyData.membersCount || 100,
-      lastUpdated: '2026م (جديدة)',
+      lastUpdated: 'النسخة الخامسة',
     };
     families.unshift(newFamily);
     saveFamilies(families);
@@ -583,15 +689,18 @@ export function deleteFamily(familyId: string): boolean {
 // -------------------------------------------------------------
 
 /**
- * Exports full website database as a downloadable JSON backup file.
+ * Exports full website database as a downloadable JSON backup file,
+ * containing complete families, full-resolution tree images, and all submissions.
  */
-export function exportSiteBackup(): { success: boolean; filename: string } {
+export function exportSiteBackup(): { success: boolean; filename: string; familiesCount: number; submissionsCount: number } {
   const families = loadFamilies();
   const submissions = loadSubmissions();
 
-  const backupData: SiteBackupData = {
-    version: '1.0',
+  const backupData: SiteBackupData & { databaseName: string; project: string } = {
+    version: '2.0-complete',
     app: 'albuainain-tree-v6',
+    databaseName: 'AlBuainainGenealogyDB',
+    project: 'buainain-be6e1',
     exportedAt: new Date().toISOString(),
     families,
     submissions,
@@ -602,7 +711,7 @@ export function exportSiteBackup(): { success: boolean; filename: string } {
   const url = URL.createObjectURL(blob);
 
   const today = new Date().toISOString().slice(0, 10);
-  const filename = `نسخة_احتياطية_شجرة_آل_بوعينين_${today}.json`;
+  const filename = `قاعدة_بيانات_شجرة_آل_بوعينين_كاملة_${today}.json`;
 
   const a = document.createElement('a');
   a.href = url;
@@ -612,13 +721,25 @@ export function exportSiteBackup(): { success: boolean; filename: string } {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  return { success: true, filename };
+  return { 
+    success: true, 
+    filename, 
+    familiesCount: families.length, 
+    submissionsCount: submissions.length 
+  };
 }
 
 /**
- * Imports full website database from a JSON backup file
+ * Imports full website database from a JSON backup file and immediately
+ * pushes everything to Firebase Firestore so all users (including GitHub Pages) see it in real time.
  */
-export function importSiteBackup(jsonContent: string): { success: boolean; message: string; familiesCount?: number; submissionsCount?: number } {
+export async function importSiteBackup(jsonContent: string): Promise<{ 
+  success: boolean; 
+  message: string; 
+  familiesCount?: number; 
+  submissionsCount?: number;
+  cloudSynced?: boolean;
+}> {
   try {
     const data = JSON.parse(jsonContent);
 
@@ -630,23 +751,64 @@ export function importSiteBackup(jsonContent: string): { success: boolean; messa
       return { success: false, message: 'صيغة النسخة الاحتياطية غير متوافقة (لا تحتوي على بيانات أسر أو طلبات).' };
     }
 
-    const familiesToSave: Family[] = Array.isArray(data.families) ? data.families : [];
-    const submissionsToSave: Submission[] = Array.isArray(data.submissions) ? data.submissions : [];
+    const incomingFamilies: Family[] = Array.isArray(data.families) ? data.families : [];
+    const incomingSubmissions: Submission[] = Array.isArray(data.submissions) ? data.submissions : [];
 
-    saveFamilies(familiesToSave);
-    saveSubmissions(submissionsToSave);
+    // Merge incoming with existing records
+    const currentFams = loadFamilies();
+    const currentSubs = loadSubmissions();
+
+    const mergedFams = mergeFamiliesList(currentFams, incomingFamilies);
+    const mergedSubs = mergeSubmissionsList(currentSubs, incomingSubmissions);
+
+    saveFamilies(mergedFams);
+    saveSubmissions(mergedSubs);
+
+    // Push full database to Firebase Cloud to synchronize across GitHub Pages and all devices!
+    const cloudPushRes = await pushAllLocalDataToFirestore(mergedFams, mergedSubs);
+
+    const cloudMsg = cloudPushRes.success 
+      ? ' وتمت مزامنتها مع سحابة Firebase بنجاح لتظهر فوراً على GitHub Pages.' 
+      : ' (تم الحفظ محلياً بنجاح، جاري استكمال الربط السحابي).';
 
     return {
       success: true,
-      message: `تم استيراد النسخة الاحتياطية بنجاح (${familiesToSave.length} أسرة، و ${submissionsToSave.length} طلب تحديث).`,
-      familiesCount: familiesToSave.length,
-      submissionsCount: submissionsToSave.length,
+      message: `تم استيراد واستعادة قاعدة البيانات بنجاح (${mergedFams.length} أسرة، و ${mergedSubs.length} طلب تحديث)${cloudMsg}`,
+      familiesCount: mergedFams.length,
+      submissionsCount: mergedSubs.length,
+      cloudSynced: cloudPushRes.success,
     };
   } catch (err) {
     console.error('Error importing backup:', err);
     return { success: false, message: 'حدث خطأ أثناء قراءة ملف النسخة الاحتياطية.' };
   }
 }
+
+/**
+ * Manually trigger complete two-way synchronization with Firebase Firestore
+ */
+export async function forceSyncAllToCloud(): Promise<{ success: boolean; message: string; families: number; submissions: number }> {
+  const currentFams = loadFamilies();
+  const currentSubs = loadSubmissions();
+
+  const res = await pushAllLocalDataToFirestore(currentFams, currentSubs);
+  if (res.success) {
+    return {
+      success: true,
+      message: `تمت المزامنة السحابية بنجاح! تم تأمين ${res.pushedFamilies} أسرة و ${res.pushedSubmissions} طلب في سحابة Firebase، وتظهر الآن على منصة GitHub Pages مباشرة.`,
+      families: res.pushedFamilies,
+      submissions: res.pushedSubmissions,
+    };
+  } else {
+    return {
+      success: false,
+      message: `تعذر إتمام المزامنة السحابية: ${res.error || 'يرجى التأكد من اتصال الإنترنت وقواعد Firestore'}.`,
+      families: 0,
+      submissions: 0,
+    };
+  }
+}
+
 
 // -------------------------------------------------------------
 // Diagnostic & Deep Recovery Tools

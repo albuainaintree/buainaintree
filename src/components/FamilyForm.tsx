@@ -183,8 +183,8 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({
             }}
             className="rounded-xl px-3 py-1.5 bg-white dark:bg-[#0F1A30] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:border-[#C5A059]"
           >
-            {allFamilies.map(f => (
-              <option key={f.id} value={f.id}>
+            {allFamilies.map((f, idx) => (
+              <option key={`${f.id}-${idx}`} value={f.id}>
                 {f.name} {f.branch ? `(الفخذ: ${f.branch})` : ''}
               </option>
             ))}
@@ -355,7 +355,7 @@ export const FamilyForm: React.FC<FamilyFormProps> = ({
           <div className="space-y-5">
             {persons.map((person, index) => (
               <div
-                key={person.tempId}
+                key={`${person.tempId}-${index}`}
                 className="relative rounded-2xl p-4 sm:p-5 bg-slate-50/80 dark:bg-black/30 border border-slate-200 dark:border-white/10 space-y-4 hover:border-[#C5A059]/50 transition-all shadow-sm"
               >
                 {/* Person Header */}

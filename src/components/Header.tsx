@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { ShieldCheck, Trees, Send, Settings, UserCheck, Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, Trees, Send, Settings, UserCheck, Menu, X, Sun, Moon, Sparkles, Cloud, CloudCheck, CloudAlert } from 'lucide-react';
+import { subscribeToCloudStatus, CloudSyncStatus } from '../services/firebaseClient';
 
 interface HeaderProps {
   currentView: 'home' | 'form' | 'admin';
@@ -23,6 +24,16 @@ export const Header: React.FC<HeaderProps> = ({
   pendingRequestsCount,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>('checking');
+  const [lastSync, setLastSync] = useState<string | undefined>();
+
+  useEffect(() => {
+    const unsub = subscribeToCloudStatus((status, details) => {
+      setCloudStatus(status);
+      setLastSync(details?.lastSync);
+    });
+    return unsub;
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#C5A059]/30 bg-white/95 dark:bg-[#070b14]/90 backdrop-blur-xl transition-colors shadow-sm">
@@ -83,6 +94,44 @@ export const Header: React.FC<HeaderProps> = ({
               <Send className="w-4 h-4 text-[#C5A059]" />
               <span>تقديم تحديث جديد</span>
             </button>
+
+            <div className="w-[1px] h-6 bg-slate-200 dark:bg-white/10 mx-1" />
+
+            {/* Live Cloud Sync Pill */}
+            <div className="hidden lg:flex items-center">
+              {cloudStatus === 'connected' ? (
+                <span 
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shadow-xs" 
+                  title={`متصل بسحابة Firebase (مشروع buainain-be6e1) ومحدث مع GitHub Pages${lastSync ? ` - آخر مزامنة: ${lastSync}` : ''}`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>سحابة متصلة ومزامنة</span>
+                </span>
+              ) : cloudStatus === 'checking' ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                  <span>جاري المزامنة...</span>
+                </span>
+              ) : cloudStatus === 'permission_denied' ? (
+                <span 
+                  onClick={onOpenSettings}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 cursor-pointer hover:brightness-110" 
+                  title="قواعد Firestore تتطلب تفعيل القراءة والكتابة في Firebase Console"
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span>قواعد السحابة</span>
+                </span>
+              ) : (
+                <span 
+                  onClick={onOpenSettings}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30 cursor-pointer hover:brightness-110"
+                  title="السحابة غير متصلة، اضغط للتحقق"
+                >
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  <span>السحابة غير متصلة</span>
+                </span>
+              )}
+            </div>
 
             <div className="w-[1px] h-6 bg-slate-200 dark:bg-white/10 mx-1" />
 

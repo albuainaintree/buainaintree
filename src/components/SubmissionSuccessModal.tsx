@@ -112,7 +112,7 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
             <span className="text-slate-400 block mb-1">الأسماء المقدمة ({submission.persons.length}):</span>
             <ul className="space-y-1 pr-2">
               {submission.persons.map((p, i) => (
-                <li key={p.id} className="text-slate-200 list-disc list-inside">
+                <li key={`${p.id || 'p'}-${i}`} className="text-slate-200 list-disc list-inside">
                   <strong>{p.fullName}</strong> — <span className="text-[#C5A059]">{getLineageStatusLabel(p.lineageStatus)}</span>
                 </li>
               ))}
