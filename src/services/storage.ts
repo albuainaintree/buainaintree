@@ -318,31 +318,41 @@ function scanAllLocalStorageForSubmissions(): Submission[] {
 // -------------------------------------------------------------
 
 try {
-  // 1. Scan and merge all historical localStorage keys to rescue any older data
-  const recoveredFams = scanAllLocalStorageForFamilies();
-  const recoveredSubs = scanAllLocalStorageForSubmissions();
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    // 1. Scan and merge all historical localStorage keys to rescue any older data
+    const recoveredFams = scanAllLocalStorageForFamilies();
+    const recoveredSubs = scanAllLocalStorageForSubmissions();
 
-  if (recoveredFams.length > 0) {
-    memoryFamilies = mergeFamiliesList(memoryFamilies, recoveredFams);
-  }
-  if (recoveredSubs.length > 0) {
-    memorySubmissions = mergeSubmissionsList(memorySubmissions, recoveredSubs);
-  }
-
-  // 2. Read specific v8 primary keys
-  const storedFams = localStorage.getItem(FAMILIES_KEY);
-  if (storedFams) {
-    const parsed = JSON.parse(storedFams);
-    if (Array.isArray(parsed)) {
-      memoryFamilies = mergeFamiliesList(memoryFamilies, parsed);
+    if (recoveredFams.length > 0) {
+      memoryFamilies = mergeFamiliesList(memoryFamilies, recoveredFams);
     }
-  }
+    if (recoveredSubs.length > 0) {
+      memorySubmissions = mergeSubmissionsList(memorySubmissions, recoveredSubs);
+    }
 
-  const storedSubs = localStorage.getItem(SUBMISSIONS_KEY);
-  if (storedSubs) {
-    const parsed = JSON.parse(storedSubs);
-    if (Array.isArray(parsed)) {
-      memorySubmissions = mergeSubmissionsList(memorySubmissions, parsed);
+    // 2. Read specific v8 primary keys
+    try {
+      const storedFams = localStorage.getItem(FAMILIES_KEY);
+      if (storedFams) {
+        const parsed = JSON.parse(storedFams);
+        if (Array.isArray(parsed)) {
+          memoryFamilies = mergeFamiliesList(memoryFamilies, parsed);
+        }
+      }
+    } catch {
+      // Ignore corrupted stored families key
+    }
+
+    try {
+      const storedSubs = localStorage.getItem(SUBMISSIONS_KEY);
+      if (storedSubs) {
+        const parsed = JSON.parse(storedSubs);
+        if (Array.isArray(parsed)) {
+          memorySubmissions = mergeSubmissionsList(memorySubmissions, parsed);
+        }
+      }
+    } catch {
+      // Ignore corrupted stored submissions key
     }
   }
 

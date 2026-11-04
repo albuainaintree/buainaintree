@@ -21,17 +21,19 @@ export const FamiliesGrid: React.FC<FamiliesGridProps> = ({
 
   // Distinct clans (الأفخاذ) for fast filtering
   const clans = useMemo(() => {
-    const list = Array.from(new Set(families.map(f => f.branch).filter(Boolean))) as string[];
+    const list = Array.from(new Set((families || []).filter(Boolean).map(f => f?.branch).filter(Boolean))) as string[];
     return ['الكل', ...list];
   }, [families]);
 
   // Filtered families based on search and clan
   const filteredFamilies = useMemo(() => {
-    return families.filter(fam => {
-      const matchSearch =
-        fam.name.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
-        (fam.branch && fam.branch.toLowerCase().includes(searchTerm.trim().toLowerCase()));
+    const q = (searchTerm || '').trim().toLowerCase();
+    return (families || []).filter(Boolean).filter(fam => {
+      if (!fam) return false;
+      const fName = (fam.name || '').toLowerCase();
+      const fBranch = (fam.branch || '').toLowerCase();
 
+      const matchSearch = !q || fName.includes(q) || fBranch.includes(q);
       const matchClan = selectedClan === 'الكل' || fam.branch === selectedClan;
 
       return matchSearch && matchClan;

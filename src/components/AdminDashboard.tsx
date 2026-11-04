@@ -158,18 +158,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Filtered Submissions
   const filteredSubmissions = useMemo(() => {
-    return submissions.filter(sub => {
+    const q = (searchQuery || '').toLowerCase().trim();
+    return (submissions || []).filter(Boolean).filter(sub => {
       const matchStatus = statusFilter === 'all' || sub.status === statusFilter;
       const matchFamily = familyFilter === 'all' || sub.familyId === familyFilter;
       
-      const q = searchQuery.toLowerCase().trim();
       const matchSearch =
         !q ||
-        sub.applicantName.toLowerCase().includes(q) ||
-        sub.applicantPhone.includes(q) ||
-        sub.referenceNumber.toLowerCase().includes(q) ||
-        sub.familyName.toLowerCase().includes(q) ||
-        sub.persons.some(p => p.fullName.toLowerCase().includes(q));
+        (sub.applicantName || '').toLowerCase().includes(q) ||
+        (sub.applicantPhone || '').includes(q) ||
+        (sub.referenceNumber || '').toLowerCase().includes(q) ||
+        (sub.familyName || '').toLowerCase().includes(q) ||
+        (sub.persons || []).some(p => p && (p.fullName || '').toLowerCase().includes(q));
 
       return matchStatus && matchFamily && matchSearch;
     });
@@ -366,12 +366,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Filtered families in Admin Tab
   const filteredAdminFamilies = useMemo(() => {
-    if (!familySearchQuery.trim()) return families;
-    const q = familySearchQuery.toLowerCase().trim();
-    return families.filter(f => 
-      f.name.toLowerCase().includes(q) || 
-      (f.branch && f.branch.toLowerCase().includes(q))
-    );
+    const q = (familySearchQuery || '').toLowerCase().trim();
+    return (families || []).filter(Boolean).filter(f => {
+      if (!f) return false;
+      const fName = (f.name || '').toLowerCase();
+      const fBranch = (f.branch || '').toLowerCase();
+      return !q || fName.includes(q) || fBranch.includes(q);
+    });
   }, [families, familySearchQuery]);
 
 

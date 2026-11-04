@@ -30,7 +30,11 @@ export default function App() {
 
   // Admin authentication state
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
-    return sessionStorage.getItem('albuainain_admin_session') === 'true';
+    try {
+      return typeof window !== 'undefined' && typeof sessionStorage !== 'undefined' && sessionStorage.getItem('albuainain_admin_session') === 'true';
+    } catch {
+      return false;
+    }
   });
 
   const [adminEmail, setAdminEmail] = useState(() => getAppConfig().adminEmail);
@@ -63,7 +67,8 @@ export default function App() {
   // Set default selected family if none chosen when going to form
   useEffect(() => {
     if (!selectedFamily && families.length > 0) {
-      setSelectedFamily(families[0]);
+      const valid = families.find(f => f && f.name);
+      if (valid) setSelectedFamily(valid);
     }
   }, [families, selectedFamily]);
 
@@ -71,7 +76,9 @@ export default function App() {
   const handleAdminLogin = (username: string, password: string): boolean => {
     if (username.trim() === 'tree4all' && password === 'AllahAkbar') {
       setIsAdminLoggedIn(true);
-      sessionStorage.setItem('albuainain_admin_session', 'true');
+      try {
+        sessionStorage.setItem('albuainain_admin_session', 'true');
+      } catch {}
       return true;
     }
     return false;
@@ -79,7 +86,9 @@ export default function App() {
 
   const handleAdminLogout = () => {
     setIsAdminLoggedIn(false);
-    sessionStorage.removeItem('albuainain_admin_session');
+    try {
+      sessionStorage.removeItem('albuainain_admin_session');
+    } catch {}
   };
 
   // Switch to update form with a specific family
