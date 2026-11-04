@@ -57,16 +57,15 @@ export const FamiliesGrid: React.FC<FamiliesGridProps> = ({
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/25 border border-[#C5A059]/50 text-xs sm:text-sm font-semibold text-[#E5C384]">
             <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
-            <span>مشروع توثيق الطبعة السادسة لشجرة نسب قبيلة آل بوعينين - 2026م</span>
+            <span>مشروع توثيق نسب قبيلة آل بوعينين</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            تحديث شجرة نسب آل بوعينين
+            توثيق شجرة نسب آل بوعينين
           </h1>
 
           <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
-            المنصة الرسمية المعتمدة لتوثيق وتحديث شجرة نسب قبيلة <strong className="text-[#E5C384]">آل بوعينين</strong> الكريمة،
-            واستقبال طلبات الإضافة وتحديث الأعقاب وتوثيق مشجرات الأسر تحت إشراف لجنة التوثيق.
+            المنصة الرسمية المعتمدة لتوثيق شجرة نسب قبيلة <strong className="text-[#E5C384]">آل بوعينين</strong>، واستقبال طلبات الإضافة والتحديث.
           </p>
         </div>
       </div>

@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="bg-gradient-to-r from-[#0F3D3E] via-[#164e4f] to-[#0F3D3E] py-1 px-4 text-center border-b border-[#C5A059]/30">
         <p className="text-[12px] md:text-xs text-[#E5C384] font-medium tracking-wide flex items-center justify-center gap-2">
           <Sparkles className="w-3.5 h-3.5 text-[#C5A059] animate-pulse" />
-          <span>مشروع توثيق الطبعة السادسة لشجرة نسب قبيلة آل بوعينين - 2026م</span>
+          <span>مشروع توثيق نسب قبيلة آل بوعينين</span>
         </p>
       </div>
 
@@ -61,10 +61,10 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="flex flex-col">
               <span className="text-lg md:text-xl font-black gold-gradient-text tracking-tight group-hover:brightness-110 transition">
-                شجرة نسب آل بوعينين
+                توثيق شجرة نسب آل بوعينين
               </span>
               <span className="text-[11px] md:text-xs text-slate-400 font-medium">
-                بوابة التحديث الرسمي - الطبعة السادسة
+                بوابة التحديث الرسمي
               </span>
             </div>
           </div>

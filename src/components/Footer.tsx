@@ -18,10 +18,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, isAd
             </div>
             <div>
               <span className="text-sm font-bold text-slate-900 dark:text-white block">
-                مشروع تحديث شجرة نسب آل بوعينين - الطبعة السادسة
+                مشروع توثيق شجرة نسب آل بوعينين
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                منصة جمع وتدقيق الأنساب والبيانات العائلية
+                منصة الجمع والتدقيق
               </span>
             </div>
           </div>
@@ -64,7 +64,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, isAd
 
         <div className="border-t border-slate-200 dark:border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 dark:text-slate-400 text-center sm:text-right">
           <p>
-            تنبيه: جميع البيانات والوثائق الواردة في هذه المنصة تخضع لتدقيق ومراجعة قبل اعتمادها في الطبعة السادسة المطبوعة.
+            تنبيه: جميع البيانات والوثائق الواردة في هذه المنصة تخضع لتدقيق ومراجعة قبل اعتمادها.
           </p>
           <p className="font-mono" dir="ltr">
             © {new Date().getFullYear()} Al-Buainain Tree Project

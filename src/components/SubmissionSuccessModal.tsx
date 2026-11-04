@@ -24,7 +24,7 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
 
   // WhatsApp share message
   const whatsappText = encodeURIComponent(
-    `السلام عليكم ورحمة الله وبركاته،\nتم إرسال طلب تحديث في مشجرة آل بوعينين (الطبعة السادسة):\n• الرقم المرجعي: ${submission.referenceNumber}\n• الأسرة: ${submission.familyName}\n• مقدم الطلب: ${submission.applicantName}\n• عدد الأسماء: ${submission.persons.length}\nشكراً لجهودكم في توثيق نسب القبيلة.`
+    `السلام عليكم ورحمة الله وبركاته،\nتم إرسال طلب تحديث في مشجرة آل بوعينين:\n• الرقم المرجعي: ${submission.referenceNumber}\n• الأسرة: ${submission.familyName}\n• مقدم الطلب: ${submission.applicantName}\n• عدد الأسماء: ${submission.persons.length}\nشكراً لجهودكم في توثيق نسب القبيلة.`
   );
 
   const handlePrint = () => {
@@ -52,7 +52,7 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
             شكراً لمساهمتكم الكريمة
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-            تم تسجيل طلب التحديث الخاص بـ <strong className="text-[#E5C384]">مشجرة {submission.familyName}</strong> بنجاح، وأُحيل إلى لجنة تدقيق الأنساب للمراجعة والاعتماد في الطبعة السادسة.
+            تم تسجيل طلب التحديث الخاص بـ <strong className="text-[#E5C384]">مشجرة {submission.familyName}</strong> بنجاح، وأُحيل إلى لجنة تدقيق الأنساب للمراجعة والاعتماد.
           </p>
         </div>
 

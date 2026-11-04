@@ -65,7 +65,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, onCon
     }
   };
 
-  const templateSnippet = `مرحباً، تم استلام طلب تحديث جديد في مشجرة آل بوعينين (الطبعة السادسة):
+  const templateSnippet = `مرحباً، تم استلام طلب تحديث جديد في مشجرة آل بوعينين:
 
 • الرقم المرجعي: {{reference_number}}
 • الأسرة: {{family_name}}
