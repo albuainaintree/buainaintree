@@ -1186,9 +1186,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   }
                   className="w-full rounded-xl px-3 py-2 bg-[#091020] border border-white/10 text-xs text-white"
                 >
-                  <option value="new_addition">إضافة جديدة (استمرت ذريته أو مواليد جدد)</option>
-                  <option value="female_descendants_only">انتهى عقبه بذرية إناث</option>
-                  <option value="lineage_ended">انتهى عقبه (توفي أو لم يعقب)</option>
+                  <option value="new_addition">إضافة جديدة</option>
+                  <option value="female_descendants_only">انتهى عقبه بذرية إناث (من توفي وله ذرية إناث فقط)</option>
+                  <option value="lineage_ended">انتهى عقبه بدون ذرية</option>
                 </select>
               </div>
 

@@ -309,11 +309,11 @@ albuainaintree@gmail.com`
 export function getLineageStatusLabel(status: string): string {
   switch (status) {
     case 'new_addition':
-      return 'إضافة جديدة (استمرت ذريته أو مواليد جدد)';
+      return 'إضافة جديدة';
     case 'female_descendants_only':
-      return 'انتهى عقبه بذرية إناث';
+      return 'انتهى عقبه بذرية إناث (من توفي وله ذرية إناث فقط)';
     case 'lineage_ended':
-      return 'انتهى عقبه (توفي أو لم يعقب)';
+      return 'انتهى عقبه بدون ذرية';
     default:
       return status;
   }
