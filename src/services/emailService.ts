@@ -77,7 +77,7 @@ export async function sendSubmissionEmailNotification(submission: Submission): P
   // 1. Prepare Admin Email Parameters (supports both custom keys and default EmailJS keys)
   const fullAdminMessage = `السلام عليكم ورحمة الله وبركاته،
 
-تم تقديم طلب تحديث جديد في مشروع توثيق شجرة نسب آل بوعينين (الطبعة السادسة):
+تم تقديم طلب تحديث جديد في مشروع توثيق شجرة نسب آل بوعينين:
 
 • الرقم المرجعي: ${submission.referenceNumber}
 • اسم الأسرة: ${submission.familyName}
@@ -115,7 +115,7 @@ ${formattedPersonsList}
   // 2. Prepare User Confirmation Parameters (if applicant provided email)
   const fullUserMessage = `السلام عليكم ورحمة الله وبركاته ${submission.applicantName}،
 
-نؤكد لكم استلام طلبكم لتحديث شجرة نسب ${submission.familyName} بنجاح ضمن مشروع الطبعة السادسة لشجرة قبيلة آل بوعينين.
+نؤكد لكم استلام طلبكم لتحديث شجرة نسب ${submission.familyName} بنجاح ضمن مشروع توثيق شجرة قبيلة آل بوعينين.
 
 • رقم الطلب المرجعي: ${submission.referenceNumber}
 • تاريخ الطلب: ${new Date(submission.createdAt).toLocaleString('ar-SA')}
@@ -216,7 +216,7 @@ export async function sendTestEmail(
     to_name: 'مدير شجرة آل بوعينين',
     from_name: 'نظام الفحص والتأكيد',
     reply_to: ADMIN_EMAIL,
-    subject: `[تجربة اتصال ناجحة] منصة شجرة آل بوعينين - الطبعة السادسة`,
+    subject: `[تجربة اتصال ناجحة] منصة توثيق شجرة آل بوعينين`,
     reference_number: `BA-TEST-${Math.floor(1000 + Math.random() * 9000)}`,
     family_name: 'اختبار الإشعارات',
     applicant_name: 'مدير النظام (فحص حي)',
@@ -226,7 +226,7 @@ export async function sendTestEmail(
     persons_list: '1. تم التحقق من ربط بريد الإدارة بنجاح',
     submission_date: new Date().toLocaleString('ar-SA'),
     message: `السلام عليكم ورحمة الله،
-هذه رسالة اختبارية لتأكيد ربط بريد الإدارة (${ADMIN_EMAIL}) مع خدمة EmailJS في مشروع توثيق شجرة نسب قبيلة آل بوعينين (الطبعة السادسة).
+هذه رسالة اختبارية لتأكيد ربط بريد الإدارة (${ADMIN_EMAIL}) مع خدمة EmailJS في مشروع توثيق شجرة نسب قبيلة آل بوعينين.
 عند تقديم أي طلب تحديث جديد من أي مستخدم أو هاتف جوال، سيصلك إشعار فوري بكافة التفاصيل.`,
   };
 
@@ -255,7 +255,7 @@ export function generateAdminMailtoUrl(submission: Submission): string {
   const bodyText = encodeURIComponent(
     `السلام عليكم ورحمة الله وبركاته،
 
-تم تقديم طلب تحديث جديد في مشروع توثيق شجرة نسب آل بوعينين (الطبعة السادسة - 2026م):
+تم تقديم طلب تحديث جديد في مشروع توثيق شجرة نسب آل بوعينين:
 
 • الرقم المرجعي: ${submission.referenceNumber}
 • اسم الأسرة: ${submission.familyName}
@@ -291,7 +291,7 @@ export function generateUserConfirmationMailtoUrl(submission: Submission): strin
   const bodyText = encodeURIComponent(
     `السلام عليكم ورحمة الله وبركاته ${submission.applicantName}،
 
-نؤكد لكم استلام طلبكم لتحديث شجرة نسب ${submission.familyName} ضمن مشروع الطبعة السادسة لشجرة قبيلة آل بوعينين.
+نؤكد لكم استلام طلبكم لتحديث شجرة نسب ${submission.familyName} ضمن مشروع توثيق شجرة قبيلة آل بوعينين.
 
 • رقم الطلب المرجعي: ${submission.referenceNumber}
 • تاريخ الطلب: ${new Date(submission.createdAt).toLocaleString('ar-SA')}

@@ -37,7 +37,7 @@ export const FamiliesGrid: React.FC<FamiliesGridProps> = ({
       const matchClan = selectedClan === 'الكل' || fam.branch === selectedClan;
 
       return matchSearch && matchClan;
-    });
+    }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar', { sensitivity: 'base' }));
   }, [families, searchTerm, selectedClan]);
 
   // Open direct in new tab

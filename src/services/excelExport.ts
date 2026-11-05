@@ -57,7 +57,7 @@ export function exportDatabaseToExcel(
         }
 
         const statusText = 
-          person.status === 'approved' ? 'معتمد للطبعة السادسة ✅' :
+          person.status === 'approved' ? 'معتمد ✅' :
           person.status === 'rejected' ? 'مرفوض ❌' : 'قيد المراجعة والتدقيق ⏳';
 
         const row = {
@@ -107,7 +107,7 @@ export function exportDatabaseToExcel(
     // 5. Generate Filename
     const today = new Date().toISOString().slice(0, 10);
     const filterTag = onlyApproved ? 'المعتمدة' : 'الكل';
-    const filename = `تحديث_شجرة_آل_بوعينين_الطبعة_السادسة_${filterTag}_${today}.xlsx`;
+    const filename = `توثيق_شجرة_آل_بوعينين_${filterTag}_${today}.xlsx`;
 
     // 6. Write and trigger download
     xlsx.writeFile(wb, filename);

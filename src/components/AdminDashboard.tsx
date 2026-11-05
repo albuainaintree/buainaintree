@@ -372,7 +372,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const fName = (f.name || '').toLowerCase();
       const fBranch = (f.branch || '').toLowerCase();
       return !q || fName.includes(q) || fBranch.includes(q);
-    });
+    }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar', { sensitivity: 'base' }));
   }, [families, familySearchQuery]);
 
 

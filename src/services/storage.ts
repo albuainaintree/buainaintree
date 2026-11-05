@@ -154,6 +154,9 @@ export function mergeFamiliesList(listA: Family[], listB: Family[]): Family[] {
     result.push(item);
   }
 
+  // Sort alphabetically by Arabic family name (الترتيب الأبجدي المعتمد للأسر)
+  result.sort((a, b) => a.name.localeCompare(b.name, 'ar', { sensitivity: 'base' }));
+
   return result;
 }
 

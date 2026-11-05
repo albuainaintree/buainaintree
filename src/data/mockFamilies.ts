@@ -46,7 +46,7 @@ export function generateFamilyTreeSvg(familyName: string, clanName: string = '')
   <g transform="translate(600, 95)" text-anchor="middle">
     <text font-size="16" fill="#C5A059" letter-spacing="4" font-weight="600">بسم الله الرحمن الرحيم</text>
     <text y="40" font-size="28" fill="url(#goldGradient)" font-weight="800" filter="url(#goldGlow)">مشجرة ${familyName} - قبيلة آل بوعينين</text>
-    <text y="70" font-size="16" fill="#94A3B8">النسخة الخامسة (المرجع المعتمد لتحديث الطبعة السادسة)</text>
+    <text y="70" font-size="16" fill="#94A3B8">النسخة الخامسة (المرجع المعتمد للتوثيق والتحديث)</text>
     <line x1="-300" y1="88" x2="300" y2="88" stroke="url(#goldGradient)" stroke-width="1.5" stroke-opacity="0.6" />
     <circle cx="0" cy="88" r="5" fill="#C5A059" />
   </g>
@@ -94,7 +94,7 @@ export function generateFamilyTreeSvg(familyName: string, clanName: string = '')
 
   <!-- Footer Seal & Notes -->
   <g transform="translate(600, 830)" text-anchor="middle">
-    <text font-size="13" fill="#64748B">${clanName ? `الفخذ: ${clanName} | ` : ''}وثيقة رسمية خاصة بمشروع تحديث شجرة نسب آل بوعينين</text>
+    <text font-size="13" fill="#64748B">${clanName ? `الفخذ: ${clanName} | ` : ''}وثيقة رسمية خاصة بمشروع توثيق شجرة نسب آل بوعينين</text>
   </g>
 </svg>
 `.trim();
