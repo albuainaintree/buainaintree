@@ -3,10 +3,11 @@ import React from 'react';
 interface FooterProps {
   onNavigate: (view: 'home' | 'form' | 'admin') => void;
   onOpenSettings: () => void;
+  onOpenContact: () => void;
   isAdminLoggedIn?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, isAdminLoggedIn = false }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, onOpenContact, isAdminLoggedIn = false }) => {
   return (
     <footer className="w-full border-t border-[#C5A059]/20 bg-white/80 dark:bg-[#060A14] text-slate-600 dark:text-slate-400 text-xs py-10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -46,6 +47,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenSettings, isAd
               className="text-slate-700 dark:text-slate-300 hover:text-[#987836] dark:hover:text-[#E5C384] transition"
             >
               لوحة تحكم المدير
+            </button>
+            <span className="text-slate-300 dark:text-white/20">•</span>
+            <button
+              type="button"
+              onClick={onOpenContact}
+              className="px-3 py-1 rounded-lg bg-[#0F3D3E]/10 dark:bg-[#C5A059]/15 text-[#0F3D3E] dark:text-[#E5C384] border border-[#C5A059]/40 font-bold hover:bg-[#0F3D3E] hover:text-white dark:hover:bg-[#C5A059] dark:hover:text-[#0A0F1D] transition"
+            >
+              تواصل معنا
             </button>
             
             {isAdminLoggedIn && (

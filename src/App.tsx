@@ -14,6 +14,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { TreeViewer } from './components/TreeViewer';
 import { SubmissionSuccessModal } from './components/SubmissionSuccessModal';
 import { ConfigModal } from './components/ConfigModal';
+import { ContactModal } from './components/ContactModal';
 import { Footer } from './components/Footer';
 import { generateFamilyTreeSvg } from './data/mockFamilies';
 import { X, Sparkles } from 'lucide-react';
@@ -26,6 +27,7 @@ export default function App() {
   const [previewFamily, setPreviewFamily] = useState<Family | null>(null);
   const [successSubmission, setSuccessSubmission] = useState<Submission | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false); // Default to bright royal palette
 
   // Admin authentication state
@@ -131,6 +133,7 @@ export default function App() {
         currentView={currentView}
         setCurrentView={setCurrentView}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenContact={() => setIsContactOpen(true)}
         isAdminLoggedIn={isAdminLoggedIn}
         onAdminLogout={handleAdminLogout}
         isDarkMode={isDarkMode}
@@ -226,10 +229,17 @@ export default function App() {
         onConfigUpdated={refreshData}
       />
 
+      {/* Contact Us Modal */}
+      <ContactModal
+        isOpen={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
+      />
+
       {/* Footer */}
       <Footer
         onNavigate={view => setCurrentView(view)}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenContact={() => setIsContactOpen(true)}
         isAdminLoggedIn={isAdminLoggedIn}
       />
     </div>

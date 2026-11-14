@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Trees, Send, Settings, UserCheck, Menu, X, Sun, Moon, Sparkles, Cloud, CloudCheck, CloudAlert } from 'lucide-react';
+import { ShieldCheck, Trees, Send, Settings, UserCheck, Menu, X, Sun, Moon, Sparkles, Mail } from 'lucide-react';
 import { subscribeToCloudStatus, CloudSyncStatus } from '../services/firebaseClient';
 
 interface HeaderProps {
   currentView: 'home' | 'form' | 'admin';
   setCurrentView: (view: 'home' | 'form' | 'admin') => void;
   onOpenSettings: () => void;
+  onOpenContact: () => void;
   isAdminLoggedIn: boolean;
   onAdminLogout: () => void;
   isDarkMode: boolean;
@@ -17,6 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentView,
   setCurrentView,
   onOpenSettings,
+  onOpenContact,
   isAdminLoggedIn,
   onAdminLogout,
   isDarkMode,
@@ -93,6 +95,15 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Send className="w-4 h-4 text-[#C5A059]" />
               <span>تقديم تحديث جديد</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenContact}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-[#0F3D3E]/10 hover:bg-[#0F3D3E] text-[#0F3D3E] hover:text-[#E5C384] dark:bg-[#C5A059]/15 dark:hover:bg-[#C5A059] dark:text-[#E5C384] dark:hover:text-[#0A0F1D] border border-[#C5A059]/50 shadow-xs transition-all"
+            >
+              <Mail className="w-4 h-4" />
+              <span>تواصل معنا</span>
             </button>
 
             <div className="w-[1px] h-6 bg-slate-200 dark:bg-white/10 mx-1" />
@@ -182,16 +193,24 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onOpenContact}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#0F3D3E] text-[#E5C384] border border-[#C5A059]/50 shadow-xs"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>تواصل</span>
+            </button>
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-lg text-slate-300 hover:bg-white/10"
+              className="p-2 rounded-lg text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
             >
               {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-200 bg-white/5 border border-white/10 hover:bg-white/10"
+              className="p-2 rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -226,6 +245,20 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="flex items-center gap-2">
               <Send className="w-4 h-4" />
               تقديم تحديث جديد
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onOpenContact();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold bg-[#0F3D3E] text-[#E5C384] border border-[#C5A059]/40"
+          >
+            <span className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-[#C5A059]" />
+              تواصل معنا (الأسئلة والمقترحات)
             </span>
           </button>
 
